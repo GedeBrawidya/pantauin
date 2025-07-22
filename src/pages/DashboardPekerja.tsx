@@ -7,8 +7,8 @@ export default function DashboardPekerja({ onPresensi, user }: {
 }) {
   const [showProfile, setShowProfile] = useState(false)
   const [foto, setFoto] = useState<string | undefined>(user.avatarUrl)
-  const [jumlahHadir, setJumlahHadir] = useState(18) // Dummy data
-  const [jumlahTidakHadir, setJumlahTidakHadir] = useState(2) // Dummy data
+  const [jumlahHadir] = useState(18) // Dummy data
+  const [jumlahTidakHadir] = useState(2) // Dummy data
 
   function handleFotoChange(e: React.ChangeEvent<HTMLInputElement>) {
     const f = e.target.files?.[0]
