@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import LogoPantauin from '../assets/LogoPantauin.png'
+import LogoPantauin from '../assets/logoPantauin.png'
 
 export default function LoginPage({ onLogin }: { onLogin: (username: string, password: string) => void }) {
   const [username, setUsername] = useState('')
