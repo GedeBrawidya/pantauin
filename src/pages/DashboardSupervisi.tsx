@@ -1,11 +1,22 @@
 import { useState } from 'react'
 import { QRCodeSVG } from 'qrcode.react'
+import LogoPantauin from '../assets/LogoPantauin.png'
+import QrScan from '../assets/qr-scan.png'
+import HomeIcon from '../assets/home.png'
+import MemberIcon from '../assets/member.png'
+import ReportIcon from '../assets/report.png'
+import VisibilityIcon from '../assets/visibility.png'
+import DownloadIcon from '../assets/downloads.png'
+import GrowthIcon from '../assets/growth.png'
+import CheckedIcon from '../assets/checked.png'
+import ProjectManagementIcon from '../assets/project-management.png'
+import MenuNavbarIcon from '../assets/menu-navbar.png'
 
 const DUMMY_PEGAWAI = [
-  { id: 1, nama: 'Supardi' },
-  { id: 2, nama: 'Budi Santoso' },
-  { id: 3, nama: 'Siti Aminah' },
-  { id: 4, nama: 'Joko Widodo' },
+  { id: 1, nama: 'Supardi', usia: 32, bidang: 'Teknik', status: 'Hadir' },
+  { id: 2, nama: 'Budi Santoso', usia: 28, bidang: 'Bangunan', status: 'Tidak Hadir' },
+  { id: 3, nama: 'Siti Aminah', usia: 30, bidang: 'Kebersihan', status: 'Hadir' },
+  { id: 4, nama: 'Joko Widodo', usia: 35, bidang: 'Keamanan', status: 'Hadir' },
 ]
 
 const DUMMY_HASIL = [
@@ -13,18 +24,45 @@ const DUMMY_HASIL = [
   { id: 2, nama: 'Budi Santoso', tugas: 'Pengecatan Dinding', status: 'Selesai', catatan: 'Sudah dicat, rapi.' },
 ]
 
+const SIDEBAR_MENU = [
+  { key: 'dashboard', label: 'Dashboard', icon: HomeIcon },
+  { key: 'pekerja', label: 'Data Pekerja', icon: MemberIcon },
+  { key: 'presensi', label: 'Presensi QR', icon: QrScan },
+  { key: 'manajemen', label: 'Manajemen Tugas', icon: ProjectManagementIcon },
+  { key: 'laporan', label: 'Laporan Pekerja', icon: ReportIcon },
+]
+
 export default function DashboardSupervisi() {
-  const [showAssign, setShowAssign] = useState(false)
-  const [showDaftar, setShowDaftar] = useState(false)
+  const [sidebar, setSidebar] = useState('pekerja')
+  const [manajemenTab, setManajemenTab] = useState<'assignment' | 'pantau'>('assignment')
   const [selectedPegawai, setSelectedPegawai] = useState<number[]>([])
   const [jenisTugas, setJenisTugas] = useState('')
   const [showQR, setShowQR] = useState<'masuk' | 'pulang' | null>(null)
   const [detailPegawai, setDetailPegawai] = useState<{ id: number, nama: string } | null>(null)
+  const [showProfile, setShowProfile] = useState(false)
+  const [foto, setFoto] = useState<string | undefined>(undefined)
+  const user = { nama: 'Sujadi', jabatan: 'Supervisor', avatarUrl: foto }
+  const [qrForm, setQrForm] = useState({ nama: '', detail: '', tanggal: '' });
+  const [qrFormSubmitted, setQrFormSubmitted] = useState(false);
+  const isQrFormValid = qrForm.nama && qrForm.detail && qrForm.tanggal;
+  // Simulasi waktu sekarang (bisa diganti dengan new Date() jika ingin real time)
+  const [dummyJam, setDummyJam] = useState<number | null>(null);
+  const now = new Date();
+  const jam = dummyJam !== null ? dummyJam : now.getHours();
+  const menit = now.getMinutes();
+  const isAfter17 = jam > 17 || (jam === 17 && menit >= 0);
+  // Untuk demo, bisa ganti jam di atas dengan const jam = 16; atau 18;
+  const [searchPekerja, setSearchPekerja] = useState('');
+  const [sortAsc, setSortAsc] = useState(true);
+  const filteredPekerja = DUMMY_PEGAWAI.filter(p => p.nama.toLowerCase().includes(searchPekerja.toLowerCase()));
+  const sortedPekerja = [...filteredPekerja].sort((a, b) => sortAsc ? a.nama.localeCompare(b.nama) : b.nama.localeCompare(a.nama));
+  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [searchLaporan, setSearchLaporan] = useState('');
+  const [sortLaporan, setSortLaporan] = useState('nama-asc');
 
   function handleAssignTugas() {
     setSelectedPegawai([])
     setJenisTugas('')
-    setShowAssign(false)
     alert('Tugas berhasil diberikan ke pekerja terpilih!')
   }
 
@@ -32,141 +70,569 @@ export default function DashboardSupervisi() {
     return DUMMY_HASIL.filter(h => h.nama === nama)
   }
 
+  function handleFotoChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const f = e.target.files?.[0]
+    if (f) {
+      const reader = new FileReader()
+      reader.onload = ev => setFoto(ev.target?.result as string)
+      reader.readAsDataURL(f)
+    }
+  }
+
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-purple-100 p-4">
-      <div className="w-full max-w-md bg-white rounded-2xl shadow-2xl p-8 flex flex-col gap-6">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-2">
+    <div className="min-h-screen flex font-sans" style={{ background: '#fff' }}>
+      {/* Sidebar dengan toggle */}
+      <div className={`transition-all duration-300 ${sidebarOpen ? 'w-64' : 'w-16'} flex-shrink-0`}>
+        <aside
+          className={`h-full flex flex-col justify-between py-4 px-2 shadow-xl rounded-2xl m-4 bg-[#5C7CFA] transition-all duration-300 ${sidebarOpen ? '' : 'items-center px-1'} overflow-hidden mt-6`}
+          style={{ minHeight: 0, height: '90vh', maxWidth: '256px', marginTop: '2rem', marginBottom: 'auto' }}
+        >
           <div>
-            <h1 className="text-xl font-bold text-gray-800">Dashboard Supervisor</h1>
-            <div className="text-gray-500 text-sm">Selamat Datang, Sujadi</div>
+            {/* Logo dan hamburger dalam satu baris */}
+            <div className={`flex items-center gap-2 mb-8 select-none transition-all duration-300 ${sidebarOpen ? '' : 'justify-center'}`}>
+              <button
+                className="p-2 rounded hover:bg-[#324AB2] hover:text-white transition flex items-center justify-center w-10 h-10"
+                style={{ background: 'white', color: '#324AB2', border: 'none' }}
+                onClick={() => setSidebarOpen(o => !o)}
+              >
+                <img src={MenuNavbarIcon} alt="Minimize" className="w-6 h-6 object-contain" />
+              </button>
+              <img src={LogoPantauin} alt="Logo Pantauin" className="w-8 h-8 object-contain" />
+              {sidebarOpen && <span className="text-lg font-bold tracking-wide whitespace-nowrap" style={{ color: '#223080' }}>Pantauin</span>}
+            </div>
+            {/* Sidebar */}
+            <nav className={`flex flex-col gap-1 mt-2 ${sidebarOpen ? '' : 'items-center'}`}>
+              {SIDEBAR_MENU.map(menu => (
+                <button
+                  key={menu.key}
+                  className={`flex items-center gap-3 px-3 py-2 rounded-lg font-semibold tracking-wide transition-all duration-200 truncate
+                    ${sidebar === menu.key
+                      ? 'bg-[#324AB2] text-white'
+                      : 'text-[#223080] hover:bg-[#324AB2] hover:text-white'}
+                    ${sidebarOpen ? 'justify-start w-full' : 'justify-center w-10'}
+                  `}
+                  style={{ border: 'none', outline: 'none', maxWidth: sidebarOpen ? '220px' : '40px' }}
+                  onClick={() => setSidebar(menu.key)}
+                  title={menu.label}
+                >
+                  {menu.icon ? (
+                    <img src={menu.icon} alt={menu.label} className="w-6 h-6 object-contain" />
+                  ) : (
+                    <span className="w-6 h-6 inline-block"></span>
+                  )}
+                  {sidebarOpen && <span className="truncate block max-w-[140px] align-middle">{menu.label}</span>}
+                </button>
+              ))}
+            </nav>
           </div>
-          <button className="border px-3 py-1 rounded-lg text-gray-700 hover:bg-gray-100 font-semibold flex items-center gap-1">
-            <span className="material-icons text-base">logout</span> Keluar
-          </button>
-        </div>
-        {/* Card Menu */}
-        <div className="flex flex-col gap-4">
-          {/* QR Masuk */}
-          <div className="border rounded-xl p-6 flex flex-col items-center gap-2">
-            <span className="material-icons text-3xl text-green-600">qr_code_2</span>
-            <div className="font-bold text-lg mt-2">QR Masuk</div>
-            <div className="text-gray-500 text-sm mb-2">Buat QR code untuk presensi masuk</div>
-            <button onClick={() => setShowQR('masuk')} className="w-full py-2 rounded bg-green-600 text-white font-semibold hover:bg-green-700 transition">Buat QR Masuk</button>
+          {/* User profile at bottom, beri margin-bottom agar tidak mepet */}
+          <div
+            className={`flex items-center gap-2 rounded-lg px-2 py-2 cursor-pointer shadow-lg hover:opacity-90 transition-all duration-200 mt-8 mb-10 ${sidebarOpen ? '' : 'justify-center px-0'}`}
+            style={{ background: '#223080', color: 'white', minWidth: 0 }}
+            onClick={() => setShowProfile(true)}
+          >
+            <img src={foto || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(user.nama)} alt="Profil" className="w-8 h-8 rounded-full object-cover border-2 border-white flex-shrink-0" />
+            {sidebarOpen && <div className="truncate">
+              <div className="font-semibold leading-tight truncate">{user.nama}</div>
+              <div className="text-xs opacity-80 truncate">{user.jabatan}</div>
+            </div>}
           </div>
-          {/* QR Pulang */}
-          <div className="border rounded-xl p-6 flex flex-col items-center gap-2">
-            <span className="material-icons text-3xl text-orange-500">qr_code_2</span>
-            <div className="font-bold text-lg mt-2">QR Pulang</div>
-            <div className="text-gray-500 text-sm mb-2">Buat QR code untuk presensi pulang</div>
-            <button onClick={() => setShowQR('pulang')} className="w-full py-2 rounded bg-orange-500 text-white font-semibold hover:bg-orange-600 transition">Buat QR Pulang</button>
-          </div>
-          {/* Berikan Tugas */}
-          <div className="border rounded-xl p-6 flex flex-col items-center gap-2">
-            <span className="material-icons text-3xl text-blue-600">assignment</span>
-            <div className="font-bold text-lg mt-2">Berikan Tugas</div>
-            <div className="text-gray-500 text-sm mb-2">Assign tugas ke pekerja (bisa batch)</div>
-            <button onClick={() => setShowAssign(true)} className="w-full py-2 rounded bg-blue-600 text-white font-semibold hover:bg-blue-700 transition">Berikan Tugas</button>
-          </div>
-          {/* Daftar Pekerja */}
-          <div className="border rounded-xl p-6 flex flex-col items-center gap-2">
-            <span className="material-icons text-3xl text-purple-600">groups</span>
-            <div className="font-bold text-lg mt-2">Daftar Pekerja</div>
-            <div className="text-gray-500 text-sm mb-2">Status presensi dan progress tugas pekerja</div>
-            <button onClick={() => setShowDaftar(true)} className="w-full py-2 rounded bg-purple-600 text-white font-semibold hover:bg-purple-700 transition">Lihat Daftar</button>
-          </div>
-        </div>
+        </aside>
       </div>
+      {/* Main Content */}
+      <main className="flex-1 p-8" style={{ background: '#fff', minHeight: '100vh' }}>
+        {/* Header */}
+        <div className="flex items-center justify-between mb-8 select-none">
+          <h1 className="text-2xl font-extrabold" style={{ color: '#223080', textShadow: '0 2px 8px #324AB233' }}>Dashboard Supervisor</h1>
+          {/* Profil button di kanan atas dihilangkan */}
+        </div>
+        {/* Content by menu */}
+        {sidebar === 'dashboard' && (
+          <section>
+            <div className="mb-2">
+              <h1 className="text-3xl font-bold text-[#2563eb]">Dashboard</h1>
+              <div className="text-[#64748b] text-base mt-1">Selamat datang kembali, sdsadsa</div>
+            </div>
+            {/* Statistik Card */}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 my-6">
+              <div className="bg-white rounded-xl shadow border border-[#e5e7eb] p-5 flex flex-col gap-2">
+                <div className="flex items-center gap-2 text-[#2563eb] font-semibold"><img src={MemberIcon} alt="Pekerja Aktif Hari Ini" className="w-6 h-6 object-contain" /> Pekerja Aktif Hari Ini</div>
+                <div className="text-2xl font-bold text-[#2563eb]">24</div>
+                <div className="text-green-600 text-sm font-semibold">+22 hadir</div>
+                <div className="text-red-500 text-sm font-semibold">-2 tidak hadir</div>
+              </div>
+              <div className="bg-white rounded-xl shadow border border-[#e5e7eb] p-5 flex flex-col gap-2">
+                <div className="flex items-center gap-2 text-[#2563eb] font-semibold"><img src={ReportIcon} alt="Laporan Masuk Hari Ini" className="w-6 h-6 object-contain" /> Laporan Masuk Hari Ini</div>
+                <div className="text-2xl font-bold text-[#f59e42]">7</div>
+                <div className="text-orange-500 text-sm font-semibold">3 penting</div>
+              </div>
+              <div className="bg-white rounded-xl shadow border border-[#e5e7eb] p-5 flex flex-col gap-2">
+                <div className="flex items-center gap-2 text-[#2563eb] font-semibold"><img src={GrowthIcon} alt="Rata-rata Kehadiran" className="w-6 h-6 object-contain" /> Rata-rata Kehadiran</div>
+                <div className="text-2xl font-bold text-[#2563eb]">89%</div>
+                <div className="text-green-600 text-sm font-semibold">+2.1% dari minggu lalu</div>
+              </div>
+              <div className="bg-white rounded-xl shadow border border-[#e5e7eb] p-5 flex flex-col gap-2">
+                <div className="flex items-center gap-2 text-[#2563eb] font-semibold"><img src={CheckedIcon} alt="Tugas Terselesaikan" className="w-6 h-6 object-contain" /> Tugas Terselesaikan</div>
+                <div className="text-2xl font-bold text-[#2563eb]">156</div>
+                <div className="text-[#64748b] text-sm">Minggu ini</div>
+              </div>
+            </div>
+            {/* Menu Cepat */}
+            <div className="text-xl font-bold text-[#1e293b] mb-2">Menu Cepat</div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+              <div className="bg-white rounded-xl shadow border border-[#e5e7eb] p-6 flex flex-col items-center gap-2">
+                <img src={ReportIcon} alt="Tambah Tugas" className="w-14 h-14 bg-[#e0e7ff] rounded-lg p-2 object-contain" />
+                <div className="font-bold text-base mt-2 text-[#1e293b]">Tambah Tugas</div>
+                <div className="text-[#64748b] text-sm mb-2">Buat tugas baru untuk pekerja</div>
+              </div>
+              <div className="bg-white rounded-xl shadow border border-[#e5e7eb] p-6 flex flex-col items-center gap-2">
+                <img src={QrScan} alt="Generate QR" className="w-14 h-14 bg-[#e0e7ff] rounded-lg p-2 object-contain" />
+                <div className="font-bold text-base mt-2 text-[#1e293b]">Generate QR</div>
+                <div className="text-[#64748b] text-sm mb-2">Buat QR code presensi</div>
+              </div>
+              <div className="bg-white rounded-xl shadow border border-[#e5e7eb] p-6 flex flex-col items-center gap-2">
+                <img src={ReportIcon} alt="Cek Laporan" className="w-14 h-14 bg-[#fff7ed] rounded-lg p-2 object-contain" />
+                <div className="font-bold text-base mt-2 text-[#1e293b]">Cek Laporan</div>
+                <div className="text-[#64748b] text-sm mb-2">Review laporan pekerja</div>
+              </div>
+            </div>
+            {/* Aktivitas Terbaru */}
+            <div className="bg-white rounded-xl shadow border border-[#e5e7eb] p-6">
+              <div className="text-xl font-bold text-[#1e293b] mb-4">Aktivitas Terbaru</div>
+              <div className="flex flex-col gap-3">
+                <div className="flex items-center gap-2 bg-[#f1f5f9] rounded-lg px-4 py-3">
+                  <span className="w-2 h-2 rounded-full bg-green-500 inline-block"></span>
+                  <span className="text-[#1e293b]">Ahmad Rizki telah menyelesaikan tugas "Pembersihan Area A"</span>
+                  <span className="text-xs text-[#64748b] ml-auto">5 menit yang lalu</span>
+                </div>
+                <div className="flex items-center gap-2 bg-[#f1f5f9] rounded-lg px-4 py-3">
+                  <span className="w-2 h-2 rounded-full bg-orange-500 inline-block"></span>
+                  <span className="text-[#1e293b]">Laporan baru: "Kerusakan Peralatan" oleh Siti Nurhaliza</span>
+                  <span className="text-xs text-[#64748b] ml-auto">15 menit yang lalu</span>
+                </div>
+                <div className="flex items-center gap-2 bg-[#f1f5f9] rounded-lg px-4 py-3">
+                  <span className="w-2 h-2 rounded-full bg-blue-500 inline-block"></span>
+                  <span className="text-[#1e293b]">3 pekerja baru telah melakukan presensi masuk</span>
+                  <span className="text-xs text-[#64748b] ml-auto">30 menit yang lalu</span>
+                </div>
+              </div>
+            </div>
+          </section>
+        )}
+        {sidebar === 'pekerja' && (
+          <section>
+            <h2 className="text-xl font-semibold mb-4" style={{ color: '#223080' }}>Data Pekerja</h2>
+            <div className="flex items-center justify-between mb-4 gap-2 flex-wrap">
+              <div className="flex gap-2">
+                <button
+                  className="px-4 py-2 rounded bg-[#324AB2] text-white font-semibold text-sm hover:bg-[#223080] transition shadow"
+                  onClick={() => setSortAsc(s => !s)}
+                >Sort {sortAsc ? 'A-Z' : 'Z-A'}</button>
+                <button
+                  className="px-4 py-2 rounded bg-green-600 text-white font-semibold text-sm hover:bg-green-700 transition shadow"
+                  onClick={() => alert('Fitur tambah pekerja belum diimplementasi')}
+                >+ Tambah Pekerja</button>
+              </div>
+              <input
+                type="text"
+                className="px-4 py-2 rounded border border-[#A5B4FC] focus:ring-2 focus:ring-[#324AB2] outline-none text-sm min-w-[180px]"
+                placeholder="Cari nama pekerja..."
+                value={searchPekerja}
+                onChange={e => setSearchPekerja(e.target.value)}
+              />
+            </div>
+            <div className="bg-white rounded-2xl shadow-lg p-6 overflow-x-auto">
+              <table className="min-w-full text-sm text-left">
+                <thead>
+                  <tr className="bg-[#F3F5FF] text-[#223080]">
+                    <th className="px-4 py-2 font-bold">No</th>
+                    <th className="px-4 py-2 font-bold">Nama</th>
+                    <th className="px-4 py-2 font-bold">Usia</th>
+                    <th className="px-4 py-2 font-bold">Bidang</th>
+                    <th className="px-4 py-2 font-bold">Status</th>
+                    <th className="px-4 py-2 font-bold">Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {sortedPekerja.map((p, i) => (
+                    <tr key={p.id} className="border-b last:border-0 hover:bg-[#F3F5FF]">
+                      <td className="px-4 py-2">{i + 1}</td>
+                      <td className="px-4 py-2 font-semibold">{p.nama}</td>
+                      <td className="px-4 py-2">{p.usia}</td>
+                      <td className="px-4 py-2">{p.bidang}</td>
+                      <td className="px-4 py-2">
+                        <span className={`px-3 py-1 rounded-full text-xs font-bold ${p.status === 'Hadir' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-600'}`}>{p.status}</span>
+                      </td>
+                      <td className="px-4 py-2 flex gap-2">
+                        <button className="px-3 py-1 rounded bg-[#324AB2] text-white text-xs font-semibold hover:bg-[#223080] transition">Edit</button>
+                        {p.status === 'Hadir' ? (
+                          <button className="px-3 py-1 rounded bg-red-100 text-red-600 text-xs font-semibold hover:bg-red-200 transition">Deactivate</button>
+                        ) : (
+                          <button className="px-3 py-1 rounded bg-green-100 text-green-700 text-xs font-semibold hover:bg-green-200 transition">Activate</button>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </section>
+        )}
+        {sidebar === 'presensi' && (
+          <section className="flex flex-col gap-8 items-start">
+            {/* Button Dummy Simulasi Jam */}
+            <div className="flex gap-2 mb-2 justify-end">
+              <button
+                className="px-3 py-1 rounded font-semibold text-sm shadow border border-[#A5B4FC] bg-white hover:bg-[#A5B4FC] hover:text-white transition"
+                onClick={() => setDummyJam(16)}
+              >Set Jam &lt; 17:00</button>
+              <button
+                className="px-3 py-1 rounded font-semibold text-sm shadow border border-[#A5B4FC] bg-white hover:bg-[#324AB2] hover:text-white transition"
+                onClick={() => setDummyJam(18)}
+              >Set Jam &gt;= 17:00</button>
+              <button
+                className="px-3 py-1 rounded font-semibold text-sm shadow border border-[#A5B4FC] bg-white hover:bg-[#A5B4FC] hover:text-white transition"
+                onClick={() => setDummyJam(null)}
+              >Reset Jam</button>
+              <span className="ml-4 text-sm font-bold" style={{ color: '#324AB2' }}>Jam sekarang: {jam.toString().padStart(2, '0')}:{menit.toString().padStart(2, '0')}</span>
+            </div>
+            {/* Flex row for QR Presensi box */}
+            <div className="bg-white rounded-2xl shadow-lg p-8 flex flex-col gap-6 w-full mb-6">
+              <h3 className="font-bold text-lg mb-2" style={{ color: '#223080' }}>Buat QR Presensi</h3>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="flex flex-col gap-1">
+                  <label className="font-semibold text-sm mb-1" style={{ color: '#223080' }}>Nama Pekerjaan</label>
+                  <input
+                    type="text"
+                    className="border rounded px-3 py-2 border-[#A5B4FC] focus:ring-2 focus:ring-[#324AB2] outline-none"
+                    placeholder="Nama pekerjaan..."
+                    value={qrForm.nama}
+                    onChange={e => setQrForm(f => ({ ...f, nama: e.target.value }))}
+                  />
+                </div>
+                <div className="flex flex-col gap-1">
+                  <label className="font-semibold text-sm mb-1" style={{ color: '#223080' }}>Detail Pekerjaan</label>
+                  <input
+                    type="text"
+                    className="border rounded px-3 py-2 border-[#A5B4FC] focus:ring-2 focus:ring-[#324AB2] outline-none"
+                    placeholder="Detail pekerjaan..."
+                    value={qrForm.detail}
+                    onChange={e => setQrForm(f => ({ ...f, detail: e.target.value }))}
+                  />
+                </div>
+                <div className="flex flex-col gap-1">
+                  <label className="font-semibold text-sm mb-1" style={{ color: '#223080' }}>Tanggal</label>
+                  <input
+                    type="date"
+                    className="border rounded px-3 py-2 border-[#A5B4FC] focus:ring-2 focus:ring-[#324AB2] outline-none"
+                    value={qrForm.tanggal}
+                    onChange={e => setQrForm(f => ({ ...f, tanggal: e.target.value }))}
+                  />
+                </div>
+              </div>
+              <div className="flex justify-end w-full">
+                <button
+                  className="py-3 px-8 rounded-lg font-bold text-lg transition-all duration-200 shadow"
+                  style={{ background: isQrFormValid ? '#324AB2' : '#A5B4FC', color: 'white', cursor: isQrFormValid ? 'pointer' : 'not-allowed', letterSpacing: 1 }}
+                  disabled={!isQrFormValid}
+                  onClick={() => isQrFormValid && setQrFormSubmitted(true)}
+                >Submit Data Presensi</button>
+              </div>
+            </div>
+            {/* QR Masuk & QR Pulang */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 w-full">
+              {/* QR Masuk */}
+              <div className="border rounded-2xl p-8 flex flex-col items-center gap-2 shadow-lg" style={{ background: 'white', borderColor: '#A5B4FC' }}>
+                <img src={QrScan} alt="QR Scan" className="w-12 h-12 object-contain mb-1" />
+                <div className="font-bold text-lg mt-2" style={{ color: '#223080' }}>QR Masuk</div>
+                <div className="text-[#22308099] text-sm mb-2">Buat QR code untuk presensi masuk</div>
+                {!qrFormSubmitted ? (
+                  <button
+                    className="w-full py-2 rounded font-semibold transition-all duration-200 shadow"
+                    style={{ background: '#A5B4FC', color: 'white', cursor: 'not-allowed' }}
+                    disabled
+                  >Data belum diisi</button>
+                ) : isAfter17 ? (
+                  <button
+                    className="w-full py-2 rounded font-semibold transition-all duration-200 shadow"
+                    style={{ background: '#A5B4FC', color: 'white', cursor: 'not-allowed' }}
+                    disabled
+                  >Waktu habis</button>
+                ) : (
+                  <button
+                    onClick={() => setShowQR('masuk')}
+                    className="w-full py-2 rounded font-semibold transition-all duration-200 shadow"
+                    style={{ background: '#324AB2', color: 'white' }}
+                  >Buat QR Masuk</button>
+                )}
+              </div>
+              {/* QR Pulang */}
+              <div className="border rounded-2xl p-8 flex flex-col items-center gap-2 shadow-lg" style={{ background: 'white', borderColor: '#A5B4FC' }}>
+                <img src={QrScan} alt="QR Scan" className="w-12 h-12 object-contain mb-1" />
+                <div className="font-bold text-lg mt-2" style={{ color: '#223080' }}>QR Pulang</div>
+                <div className="text-[#22308099] text-sm mb-2">Buat QR code untuk presensi pulang</div>
+                {!qrFormSubmitted ? (
+                  <button
+                    className="w-full py-2 rounded font-semibold transition-all duration-200 shadow"
+                    style={{ background: '#A5B4FC', color: 'white', cursor: 'not-allowed' }}
+                    disabled
+                  >Data belum diisi</button>
+                ) : !isAfter17 ? (
+                  <button
+                    className="w-full py-2 rounded font-semibold transition-all duration-200 shadow"
+                    style={{ background: '#A5B4FC', color: 'white', cursor: 'not-allowed' }}
+                    disabled
+                  >Belum bisa presensi</button>
+                ) : (
+                  <button
+                    onClick={() => setShowQR('pulang')}
+                    className="w-full py-2 rounded font-semibold transition-all duration-200 shadow"
+                    style={{ background: '#324AB2', color: 'white' }}
+                  >Buat QR Pulang</button>
+                )}
+              </div>
+            </div>
+          </section>
+        )}
+        {sidebar === 'manajemen' && (
+          <section className="flex flex-col gap-8 items-start">
+            {/* Tab Navigasi */}
+            <div className="flex gap-2 mb-4 bg-[#F3F5FF] rounded-xl p-2 shadow-sm">
+              <button
+                className={`flex-1 py-3 rounded-lg font-bold text-base transition-all duration-200
+                  ${manajemenTab === 'assignment'
+                    ? ''
+                    : ''}`}
+                style={manajemenTab === 'assignment'
+                  ? { background: '#324AB2', color: 'white', boxShadow: '0 2px 8px #324AB233' }
+                  : { color: '#223080', background: 'transparent' }}
+                onClick={() => setManajemenTab('assignment')}
+              >Berikan Tugas</button>
+              <button
+                className={`flex-1 py-3 rounded-lg font-bold text-base transition-all duration-200`}
+                style={manajemenTab === 'pantau'
+                  ? { background: '#324AB2', color: 'white', boxShadow: '0 2px 8px #324AB233' }
+                  : { color: '#223080', background: 'transparent' }}
+                onClick={() => setManajemenTab('pantau')}
+              >Pantau Pekerja & Hasil Tugas</button>
+            </div>
+            {/* Konten Tab */}
+            {manajemenTab === 'assignment' && (
+              <div className="bg-white rounded-2xl shadow-lg p-8 flex flex-col gap-6">
+                <h3 className="font-bold text-lg mb-2" style={{ color: '#223080' }}>Berikan Tugas ke Pekerja</h3>
+                <div className="flex flex-col gap-2 max-h-40 overflow-y-auto">
+                  {DUMMY_PEGAWAI.map(p => (
+                    <label key={p.id} className="flex items-center gap-2">
+                      <input
+                        type="checkbox"
+                        checked={selectedPegawai.includes(p.id)}
+                        onChange={e => setSelectedPegawai(sel => e.target.checked ? [...sel, p.id] : sel.filter(id => id !== p.id))}
+                      />
+                      <span style={{ color: '#223080' }}>{p.nama}</span>
+                    </label>
+                  ))}
+                </div>
+                <input
+                  type="text"
+                  className="border rounded px-3 py-2 mt-2 border-primary/30 focus:ring-2 focus:ring-primary-dark outline-none"
+                  style={{ borderColor: '#A5B4FC' }}
+                  placeholder="Jenis tugas..."
+                  value={jenisTugas}
+                  onChange={e => setJenisTugas(e.target.value)}
+                />
+                <button
+                  className="w-full py-2 rounded font-semibold transition-all duration-200 shadow mt-2"
+                  style={{ background: '#324AB2', color: 'white' }}
+                  disabled={selectedPegawai.length === 0 || !jenisTugas}
+                  onClick={handleAssignTugas}
+                >
+                  Berikan Tugas
+                </button>
+              </div>
+            )}
+            {manajemenTab === 'pantau' && (
+              <div className="bg-white rounded-2xl shadow-lg p-8 flex flex-col gap-6">
+                <h3 className="font-bold text-lg mb-2" style={{ color: '#223080' }}>Pantau Pekerja & Hasil Tugas</h3>
+                <div className="flex flex-col gap-2 max-h-40 overflow-y-auto">
+                  {DUMMY_PEGAWAI.map(p => (
+                    <div key={p.id} className="flex items-center gap-2 cursor-pointer hover:underline" onClick={() => setDetailPegawai(p)}>
+                      <span className="font-semibold" style={{ color: '#223080' }}>{p.nama}</span>
+                      <span className="text-xs" style={{ color: '#A5B4FC' }}>(lihat detail tugas)</span>
+                    </div>
+                  ))}
+                </div>
+                <div className="mt-4">
+                  <div className="font-semibold mb-1" style={{ color: '#223080' }}>Hasil Tugas Selesai:</div>
+                  <div className="flex flex-col gap-2 max-h-32 overflow-y-auto">
+                    {DUMMY_HASIL.map(h => (
+                      <div key={h.id} className="border rounded p-2 flex flex-col gap-1" style={{ background: '#F3F5FF', borderColor: '#A5B4FC' }}>
+                        <div className="font-semibold" style={{ color: '#324AB2' }}>{h.nama} - {h.tugas}</div>
+                        <div className="text-xs" style={{ color: '#22308099' }}>Catatan: {h.catatan}</div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+          </section>
+        )}
+        {sidebar === 'laporan' && (
+          <section>
+            <h2 className="text-xl font-semibold mb-4" style={{ color: '#223080' }}>Laporan Tugas Harian Pekerja</h2>
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-4">
+              <input
+                type="text"
+                placeholder="Cari nama atau tugas..."
+                className="px-4 py-2 rounded border border-blue-200 focus:ring-2 focus:ring-blue-200 outline-none text-sm w-full md:w-64"
+                value={searchLaporan || ''}
+                onChange={e => setSearchLaporan(e.target.value)}
+              />
+              <select
+                className="px-4 py-2 rounded border border-blue-200 text-sm bg-white w-full md:w-48"
+                value={sortLaporan || 'nama-asc'}
+                onChange={e => setSortLaporan(e.target.value)}
+              >
+                <option value="nama-asc">Urutkan Nama (A-Z)</option>
+                <option value="nama-desc">Urutkan Nama (Z-A)</option>
+                <option value="status-selesai">Status: Selesai dulu</option>
+                <option value="status-dikerjakan">Status: Sedang Dikerjakan dulu</option>
+              </select>
+            </div>
+            <div className="flex flex-col gap-6">
+              {[
+                {
+                  id: 1,
+                  tugas: 'Pemeriksaan Peralatan',
+                  pekerja: 'Ahmad Rizki',
+                  status: 'Selesai',
+                  waktu: '10:30',
+                  catatan: 'Semua peralatan dalam kondisi baik. Tidak ada kerusakan ditemukan.',
+                  file: true
+                },
+                {
+                  id: 2,
+                  tugas: 'Pembersihan Area Kerja',
+                  pekerja: 'Ahmad Rizki',
+                  status: 'Selesai',
+                  waktu: '11:15',
+                  catatan: 'Area kerja sudah dibersihkan sesuai SOP. Semua limbah sudah dibuang dengan benar.',
+                  file: true
+                },
+                {
+                  id: 3,
+                  tugas: 'Laporan Harian',
+                  pekerja: 'Ahmad Rizki',
+                  status: 'Sedang Dikerjakan',
+                  waktu: '',
+                  catatan: '',
+                  file: false
+                },
+                {
+                  id: 4,
+                  tugas: 'Pemeriksaan Peralatan',
+                  pekerja: 'Siti Nurhaliza',
+                  status: 'Selesai',
+                  waktu: '09:45',
+                  catatan: 'Peralatan area B telah diperiksa. Ditemukan 1 alat yang perlu maintenance ringan.',
+                  file: true
+                }
+              ]
+                .filter(laporan =>
+                  (!searchLaporan ||
+                    laporan.pekerja.toLowerCase().includes(searchLaporan.toLowerCase()) ||
+                    laporan.tugas.toLowerCase().includes(searchLaporan.toLowerCase())
+                  )
+                )
+                .sort((a, b) => {
+                  if (sortLaporan === 'nama-asc') return a.pekerja.localeCompare(b.pekerja)
+                  if (sortLaporan === 'nama-desc') return b.pekerja.localeCompare(a.pekerja)
+                  if (sortLaporan === 'status-selesai') return a.status === b.status ? 0 : a.status === 'Selesai' ? -1 : 1
+                  if (sortLaporan === 'status-dikerjakan') return a.status === b.status ? 0 : a.status === 'Sedang Dikerjakan' ? -1 : 1
+                  return 0
+                })
+                .map((laporan, idx) => (
+                  <div key={laporan.id} className="bg-white rounded-2xl shadow p-6 mb-2 relative">
+                    <div className="flex items-center justify-between mb-2">
+                      <div>
+                        <div className="font-bold text-lg text-[#223080]">{laporan.tugas}</div>
+                        <div className="text-sm text-[#64748b]">Pekerja: {laporan.pekerja} {laporan.status === 'Selesai' && <span className="text-green-600 font-semibold ml-2">• Selesai: {laporan.waktu}</span>}</div>
+                      </div>
+                      <div>
+                        {laporan.status === 'Selesai' ? (
+                          <span className="px-4 py-1 rounded-full bg-blue-500 text-white text-sm font-bold absolute top-6 right-6">Selesai</span>
+                        ) : (
+                          <span className="px-4 py-1 rounded-full bg-gray-200 text-gray-700 text-sm font-bold absolute top-6 right-6">Sedang Dikerjakan</span>
+                        )}
+                      </div>
+                    </div>
+                    <div className="bg-[#f3f5ff] rounded-lg p-4 mb-3 flex items-start gap-2">
+                      <div>
+                        <div className="font-semibold text-[#223080] mb-1">Catatan:</div>
+                        <div className="text-[#223080] text-sm">{laporan.catatan || <span className="italic text-gray-400">Belum ada catatan.</span>}</div>
+                      </div>
+                    </div>
+                    <div className="flex gap-2 mt-2">
+                      <button className="flex items-center gap-1 px-4 py-2 rounded border border-gray-300 bg-gray-50 text-gray-700 font-semibold text-sm hover:bg-gray-100 transition" disabled={!laporan.file}>
+                        <img src={VisibilityIcon} alt="Lihat File" className="w-5 h-5 object-contain align-middle" /> Lihat File
+                      </button>
+                      <button className="flex items-center gap-1 px-4 py-2 rounded border border-gray-300 bg-gray-50 text-gray-700 font-semibold text-sm hover:bg-gray-100 transition" disabled={!laporan.file}>
+                        <img src={DownloadIcon} alt="Download" className="w-5 h-5 object-contain align-middle" /> Download
+                      </button>
+                    </div>
+                  </div>
+                ))}
+            </div>
+          </section>
+        )}
+      </main>
       {/* Modal QR Code */}
       {showQR && (
         <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-20">
-          <div className="bg-white rounded-xl shadow-xl p-6 w-full max-w-xs flex flex-col items-center gap-4">
-            <div className="font-bold text-lg mb-2">{showQR === 'masuk' ? 'QR Masuk' : 'QR Pulang'}</div>
+          <div className="bg-white rounded-2xl shadow-xl p-6 w-full max-w-xs flex flex-col items-center gap-4">
+            <div className="font-bold text-lg mb-2 text-primary-dark">{showQR === 'masuk' ? 'QR Masuk' : 'QR Pulang'}</div>
             <QRCodeSVG value={showQR === 'masuk' ? 'QR-MASUK-2025' : 'QR-PULANG-2025'} size={180} />
-            <button className="mt-4 px-4 py-2 rounded bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold" onClick={() => setShowQR(null)}>Tutup</button>
+            <button className="mt-4 px-4 py-2 rounded bg-primary-accent hover:bg-primary-dark hover:text-white text-primary-dark font-semibold transition-all duration-200" onClick={() => setShowQR(null)}>Tutup</button>
           </div>
         </div>
       )}
-      {/* Modal Assign Tugas */}
-      {showAssign && (
-        <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-10">
-          <div className="bg-white rounded-xl shadow-xl p-6 w-full max-w-md flex flex-col gap-4">
-            <div className="font-bold text-lg mb-2">Berikan Tugas ke Pekerja</div>
-            <div className="flex flex-col gap-2 max-h-40 overflow-y-auto">
-              {DUMMY_PEGAWAI.map(p => (
-                <label key={p.id} className="flex items-center gap-2">
-                  <input
-                    type="checkbox"
-                    checked={selectedPegawai.includes(p.id)}
-                    onChange={e => setSelectedPegawai(sel => e.target.checked ? [...sel, p.id] : sel.filter(id => id !== p.id))}
-                  />
-                  <span>{p.nama}</span>
-                </label>
-              ))}
+      {/* Modal Profile */}
+      {showProfile && (
+        <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-30">
+          <div className="bg-white rounded-2xl shadow-xl p-6 w-full max-w-xs flex flex-col items-center gap-4">
+            <div className="font-bold text-lg mb-2" style={{ color: '#223080' }}>Profil Supervisor</div>
+            <img src={foto || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(user.nama)} alt="Foto Profil" className="w-24 h-24 rounded-full border-4" style={{ borderColor: '#324AB2' }} />
+            <div className="w-full">
+              <div className="font-semibold" style={{ color: '#223080' }}>Nama</div>
+              <div className="mb-2">{user.nama}</div>
+              <div className="font-semibold" style={{ color: '#223080' }}>Jabatan</div>
+              <div className="mb-2">{user.jabatan}</div>
+              <div className="font-semibold mb-1" style={{ color: '#223080' }}>Foto Profil</div>
+              <label className="flex items-center gap-2 px-4 py-2 rounded border border-blue-200 bg-blue-50 text-blue-700 font-semibold text-sm hover:bg-blue-100 transition cursor-pointer w-fit">
+                <span className="material-icons text-base">upload</span> Upload Foto
+                <input type="file" className="hidden" onChange={handleFotoChange} />
+              </label>
             </div>
-            <input
-              type="text"
-              className="border rounded px-3 py-2 mt-2"
-              placeholder="Jenis tugas..."
-              value={jenisTugas}
-              onChange={e => setJenisTugas(e.target.value)}
-            />
-            <button
-              className="w-full py-2 rounded bg-blue-600 text-white font-semibold hover:bg-blue-700 transition mt-2"
-              disabled={selectedPegawai.length === 0 || !jenisTugas}
-              onClick={handleAssignTugas}
-            >
-              Berikan Tugas
-            </button>
-            <button className="text-gray-400 hover:underline mt-2" onClick={() => setShowAssign(false)}>Batal</button>
-          </div>
-        </div>
-      )}
-      {/* Modal Daftar Pekerja & Hasil Tugas */}
-      {showDaftar && (
-        <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-10">
-          <div className="bg-white rounded-xl shadow-xl p-6 w-full max-w-md flex flex-col gap-4">
-            <div className="font-bold text-lg mb-2">Daftar Pekerja & Hasil Tugas</div>
-            <div className="flex flex-col gap-2 max-h-40 overflow-y-auto">
-              {DUMMY_PEGAWAI.map(p => (
-                <div key={p.id} className="flex items-center gap-2 cursor-pointer hover:underline" onClick={() => setDetailPegawai(p)}>
-                  <span className="font-semibold">{p.nama}</span>
-                  <span className="text-xs text-blue-500">(lihat detail tugas)</span>
-                </div>
-              ))}
-            </div>
-            <div className="mt-4">
-              <div className="font-semibold mb-1">Hasil Tugas Selesai:</div>
-              <div className="flex flex-col gap-2 max-h-32 overflow-y-auto">
-                {DUMMY_HASIL.map(h => (
-                  <div key={h.id} className="border rounded p-2 flex flex-col gap-1 bg-green-50">
-                    <div className="font-semibold text-green-700">{h.nama} - {h.tugas}</div>
-                    <div className="text-xs text-gray-500">Catatan: {h.catatan}</div>
-                  </div>
-                ))}
-              </div>
-            </div>
-            <button className="text-gray-400 hover:underline mt-2" onClick={() => setShowDaftar(false)}>Tutup</button>
+            <button className="mt-2 px-4 py-2 rounded font-semibold transition-all duration-200" style={{ background: '#324AB2', color: 'white' }} onClick={() => setShowProfile(false)}>Tutup</button>
           </div>
         </div>
       )}
       {/* Modal Detail Tugas Pekerja */}
       {detailPegawai && (
         <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-30">
-          <div className="bg-white rounded-xl shadow-xl p-6 w-full max-w-xs flex flex-col gap-4">
-            <div className="font-bold text-lg mb-2">Detail Tugas: {detailPegawai.nama}</div>
+          <div className="bg-white rounded-2xl shadow-xl p-6 w-full max-w-xs flex flex-col items-center gap-4">
+            <div className="font-bold text-lg mb-2 text-primary-dark">Detail Tugas: {detailPegawai.nama}</div>
             <div className="flex flex-col gap-2">
               {getHasilByPegawai(detailPegawai.nama).length === 0 && (
-                <div className="text-gray-400 text-center">Belum ada tugas selesai.</div>
+                <div className="text-primary-dark/60 text-center">Belum ada tugas selesai.</div>
               )}
               {getHasilByPegawai(detailPegawai.nama).map(h => (
-                <div key={h.id} className="border rounded p-2 flex flex-col gap-1 bg-green-50">
-                  <div className="font-semibold text-green-700">{h.tugas}</div>
-                  <div className="text-xs text-gray-500">Catatan: {h.catatan}</div>
+                <div key={h.id} className="border rounded p-2 flex flex-col gap-1 bg-primary-bg">
+                  <div className="font-semibold text-primary">{h.tugas}</div>
+                  <div className="text-xs text-primary-dark/80">Catatan: {h.catatan}</div>
                 </div>
               ))}
             </div>
-            <button className="mt-4 px-4 py-2 rounded bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold" onClick={() => setDetailPegawai(null)}>Tutup</button>
+            <button className="mt-4 px-4 py-2 rounded bg-primary-accent hover:bg-primary-dark hover:text-white text-primary-dark font-semibold transition-all duration-200" onClick={() => setDetailPegawai(null)}>Tutup</button>
           </div>
         </div>
       )}

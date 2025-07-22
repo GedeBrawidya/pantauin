@@ -87,7 +87,8 @@ export default function TugasHarianPage() {
                   />
                 </div>
                 <div className="flex gap-2 mt-2 items-center">
-                  <label className="flex items-center gap-2 px-4 py-2 rounded border border-blue-200 bg-blue-50 text-blue-700 font-semibold text-sm hover:bg-blue-100 transition cursor-pointer">
+                  {/* Custom Upload Button, konsisten dengan DashboardPekerja */}
+                  <label className="flex items-center gap-2 px-4 py-2 rounded border border-blue-200 bg-blue-50 text-blue-700 font-semibold text-sm hover:bg-blue-100 transition cursor-pointer w-fit">
                     <span className="material-icons text-base">upload</span> Upload Foto/Dokumen
                     <input
                       type="file"
@@ -96,6 +97,7 @@ export default function TugasHarianPage() {
                       disabled={!!selesai[tugas.id]}
                     />
                   </label>
+                  {/* Tampilkan nama file jika ada */}
                   {files[tugas.id] && (
                     <span className="text-xs text-gray-500 truncate max-w-[120px]">{files[tugas.id]?.name}</span>
                   )}

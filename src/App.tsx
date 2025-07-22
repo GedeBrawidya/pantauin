@@ -34,7 +34,7 @@ function AppRoutes() {
   return (
     <Routes>
       <Route path="/" element={<LoginPage onLogin={handleLogin} />} />
-      <Route path="/dashboard" element={role === 'pekerja' ? <DashboardPekerja user={user!} onPresensi={() => navigate('/presensi')} onProfile={() => alert('Fitur profil belum tersedia')} /> : <Navigate to="/" />} />
+      <Route path="/dashboard" element={role === 'pekerja' ? <DashboardPekerja user={user!} onPresensi={() => navigate('/presensi')} /> : <Navigate to="/" />} />
       <Route path="/presensi" element={role === 'pekerja' ? <PresensiPage onSuccess={() => navigate('/tugas')} /> : <Navigate to="/" />} />
       <Route path="/tugas" element={role === 'pekerja' ? <TugasHarianPage /> : <Navigate to="/" />} />
       <Route path="/supervisi" element={role === 'supervisi' ? <DashboardSupervisi /> : <Navigate to="/" />} />

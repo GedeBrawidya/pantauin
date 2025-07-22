@@ -1,5 +1,6 @@
 import { useRef, useState, useEffect } from 'react'
 import { BrowserMultiFormatReader } from '@zxing/browser'
+import QrScan from '../assets/qr-scan.png'
 
 export default function PresensiPage({ onSuccess }: { onSuccess?: (result?: string) => void } = {}) {
   const videoRef = useRef<HTMLVideoElement>(null)
@@ -34,6 +35,7 @@ export default function PresensiPage({ onSuccess }: { onSuccess?: (result?: stri
     <div className="min-h-screen flex flex-col items-center justify-center bg-blue-50">
       <div className="bg-white rounded-xl shadow p-8 flex flex-col items-center gap-6">
         <div className="text-2xl font-bold text-blue-700">Scan QR Presensi</div>
+        <img src={QrScan} alt="QR Scan" className="w-20 h-20 object-contain" />
         <video ref={videoRef} className="w-64 h-64 bg-black rounded-lg" autoPlay muted playsInline />
         {error && <div className="text-red-500 text-sm">{error}</div>}
         <button
