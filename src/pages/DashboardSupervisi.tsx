@@ -10,7 +10,7 @@ import DownloadIcon from '../assets/downloads.png'
 import GrowthIcon from '../assets/growth.png'
 import CheckedIcon from '../assets/checked.png'
 import ProjectManagementIcon from '../assets/project-management.png'
-import MenuNavbarIcon from '../assets/menu-navbar.png'
+
 
 const DUMMY_PEGAWAI = [
   { id: 1, nama: 'Supardi', usia: 32, bidang: 'Teknik', status: 'Hadir' },
@@ -56,9 +56,10 @@ export default function DashboardSupervisi() {
   const [sortAsc, setSortAsc] = useState(true);
   const filteredPekerja = DUMMY_PEGAWAI.filter(p => p.nama.toLowerCase().includes(searchPekerja.toLowerCase()));
   const sortedPekerja = [...filteredPekerja].sort((a, b) => sortAsc ? a.nama.localeCompare(b.nama) : b.nama.localeCompare(a.nama));
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [sidebarOpen ] = useState(true);
   const [searchLaporan, setSearchLaporan] = useState('');
   const [sortLaporan, setSortLaporan] = useState('nama-asc');
+  const [filterLaporan, setFilterLaporan] = useState('all');
 
   function handleAssignTugas() {
     setSelectedPegawai([])
@@ -82,53 +83,56 @@ export default function DashboardSupervisi() {
   return (
     <div className="min-h-screen flex font-sans" style={{ background: '#fff' }}>
       {/* Sidebar dengan toggle */}
-      <div className={`transition-all duration-300 ${sidebarOpen ? 'w-64' : 'w-16'} flex-shrink-0`}>
+      <div className={`transition-all duration-300 ease-in-out ${sidebarOpen ? 'w-72' : 'w-28'} flex-shrink-0`} style={{ background: !sidebarOpen ? '#CAF0F8' : undefined }}>
         <aside
-          className={`h-full flex flex-col justify-between py-4 px-2 shadow-xl rounded-2xl m-4 bg-[#5C7CFA] transition-all duration-300 ${sidebarOpen ? '' : 'items-center px-1'} overflow-hidden mt-6`}
-          style={{ minHeight: 0, height: '90vh', maxWidth: '256px', marginTop: '2rem', marginBottom: 'auto' }}
+          className={`h-full flex flex-col justify-between py-4 ${sidebarOpen ? 'px-4' : 'px-4'} shadow-xl rounded-2xl m-4 transition-all duration-300 ${sidebarOpen ? '' : 'items-center'} overflow-hidden mt-6`}
+          style={{ background: sidebarOpen ? '#e3f2fd' : '#CAF0F8', minHeight: 0, height: '90vh', maxWidth: '288px', marginTop: '2rem', marginBottom: 'auto' }}
         >
           <div>
-            {/* Logo dan hamburger dalam satu baris */}
-            <div className={`flex items-center gap-2 mb-8 select-none transition-all duration-300 ${sidebarOpen ? '' : 'justify-center'}`}>
-              <button
-                className="p-2 rounded hover:bg-[#324AB2] hover:text-white transition flex items-center justify-center w-10 h-10"
-                style={{ background: 'white', color: '#324AB2', border: 'none' }}
-                onClick={() => setSidebarOpen(o => !o)}
-              >
-                <img src={MenuNavbarIcon} alt="Minimize" className="w-6 h-6 object-contain" />
-              </button>
+            {/* Logo dan hamburger dalam satu baris, button minimize selalu tampil */}
+            <div className={`flex items-center gap-2 mb-8 select-none transition-all duration-300`} style={{ minHeight: '48px' }}>
               <img src={LogoPantauin} alt="Logo Pantauin" className="w-8 h-8 object-contain" />
-              {sidebarOpen && <span className="text-lg font-bold tracking-wide whitespace-nowrap" style={{ color: '#223080' }}>Pantauin</span>}
+              <span className="text-2xl font-bold tracking-wide whitespace-nowrap text-[#223080]">Pantauin</span>
             </div>
             {/* Sidebar */}
             <nav className={`flex flex-col gap-1 mt-2 ${sidebarOpen ? '' : 'items-center'}`}>
               {SIDEBAR_MENU.map(menu => (
                 <button
                   key={menu.key}
-                  className={`flex items-center gap-3 px-3 py-2 rounded-lg font-semibold tracking-wide transition-all duration-200 truncate
-                    ${sidebar === menu.key
-                      ? 'bg-[#324AB2] text-white'
-                      : 'text-[#223080] hover:bg-[#324AB2] hover:text-white'}
-                    ${sidebarOpen ? 'justify-start w-full' : 'justify-center w-10'}
+                  className={`flex items-center justify-center font-bold tracking-wide transition-all duration-300 ease-in-out ${sidebarOpen ? 'gap-2 px-3 py-2 rounded-2xl w-full' : 'w-12 h-12 rounded-2xl'}
+                      ${sidebar === menu.key
+                        ? sidebarOpen ? 'bg-[#90e0ef] text-[#03045E]' : 'bg-[#90e0ef] text-[#03045E]'
+                        : sidebarOpen ? 'hover:bg-[#caf0f8] hover:text-[#03045E]' : 'hover:bg-[#caf0f8]'}
                   `}
-                  style={{ border: 'none', outline: 'none', maxWidth: sidebarOpen ? '220px' : '40px' }}
+                  style={{
+                    border: 'none',
+                    outline: 'none',
+                    minWidth: sidebarOpen ? 0 : 40,
+                    maxWidth: sidebarOpen ? '100%' : 56,
+                    width: sidebarOpen ? '100%' : 48,
+                    color: sidebarOpen ? (sidebar === menu.key ? '#03045E' : '#03045E') : (sidebar === menu.key ? '#03045E' : '#03045E'),
+                    background: !sidebarOpen && sidebar === menu.key ? '#90e0ef' : undefined,
+                    borderRadius: 16,
+                    fontWeight: sidebarOpen ? 700 : 700,
+                    transition: 'all 0.3s cubic-bezier(0.4,0,0.2,1)'
+                  }}
                   onClick={() => setSidebar(menu.key)}
                   title={menu.label}
                 >
                   {menu.icon ? (
-                    <img src={menu.icon} alt={menu.label} className="w-6 h-6 object-contain" />
+                    <img src={menu.icon} alt={menu.label} className={`object-contain transition-all duration-300 ease-in-out ${sidebarOpen ? 'w-5 h-5' : 'w-7 h-7'}`} style={{ filter: !sidebarOpen && sidebar === menu.key ? 'none' : !sidebarOpen ? 'grayscale(1) brightness(0.5)' : undefined, transition: 'all 0.3s cubic-bezier(0.4,0,0.2,1)' }} />
                   ) : (
-                    <span className="w-6 h-6 inline-block"></span>
+                    <span className={sidebarOpen ? 'w-5 h-5 inline-block' : 'w-7 h-7 inline-block'} style={{ transition: 'all 0.3s cubic-bezier(0.4,0,0.2,1)' }}></span>
                   )}
-                  {sidebarOpen && <span className="truncate block max-w-[140px] align-middle">{menu.label}</span>}
+                  {sidebarOpen && <span className="block w-full text-left transition-all duration-300 ease-in-out" style={{ transition: 'all 0.3s cubic-bezier(0.4,0,0.2,1)' }}>{menu.label}</span>}
                 </button>
               ))}
             </nav>
           </div>
           {/* User profile at bottom, beri margin-bottom agar tidak mepet */}
           <div
-            className={`flex items-center gap-2 rounded-lg px-2 py-2 cursor-pointer shadow-lg hover:opacity-90 transition-all duration-200 mt-8 mb-10 ${sidebarOpen ? '' : 'justify-center px-0'}`}
-            style={{ background: '#223080', color: 'white', minWidth: 0 }}
+            className={`flex items-center ${sidebarOpen ? 'gap-2 rounded-2xl px-4 py-3' : 'justify-center'} cursor-pointer shadow-lg hover:opacity-90 transition-all duration-200 mb-10`}
+            style={{ background: sidebarOpen ? '#0077B6' : '#0077B6', color: 'white', minWidth: 0, borderRadius: 20, width: sidebarOpen ? undefined : 48, height: sidebarOpen ? undefined : 48, marginLeft: sidebarOpen ? 0 : 'auto', marginRight: sidebarOpen ? 0 : 'auto', marginTop: !sidebarOpen ? 96 : undefined }}
             onClick={() => setShowProfile(true)}
           >
             <img src={foto || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(user.nama)} alt="Profil" className="w-8 h-8 rounded-full object-cover border-2 border-white flex-shrink-0" />
@@ -140,57 +144,68 @@ export default function DashboardSupervisi() {
         </aside>
       </div>
       {/* Main Content */}
-      <main className="flex-1 p-8" style={{ background: '#fff', minHeight: '100vh' }}>
+      <main className="flex-1 p-8" style={{ background: '#ffffff', minHeight: '100vh' }}>
         {/* Header */}
-        <div className="flex items-center justify-between mb-8 select-none">
+        {/* <div className="flex items-center justify-between mb-8 select-none">
           <h1 className="text-2xl font-extrabold" style={{ color: '#223080', textShadow: '0 2px 8px #324AB233' }}>Dashboard Supervisor</h1>
-          {/* Profil button di kanan atas dihilangkan */}
-        </div>
+        </div> */}
         {/* Content by menu */}
         {sidebar === 'dashboard' && (
           <section>
             <div className="mb-2">
-              <h1 className="text-3xl font-bold text-[#2563eb]">Dashboard</h1>
-              <div className="text-[#64748b] text-base mt-1">Selamat datang kembali, sdsadsa</div>
+              <h1 className="text-2xl font-extrabold" style={{ color: '#223080', textShadow: '0 2px 8px #324AB233' }}>Dashboard</h1>
+              <div className="text-[#64748b] text-base mt-1">Selamat datang kembali, <span className="font-bold text-[#03045E]">Sujadi</span></div>
             </div>
             {/* Statistik Card */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4 my-6">
-              <div className="bg-white rounded-xl shadow border border-[#e5e7eb] p-5 flex flex-col gap-2">
-                <div className="flex items-center gap-2 text-[#2563eb] font-semibold"><img src={MemberIcon} alt="Pekerja Aktif Hari Ini" className="w-6 h-6 object-contain" /> Pekerja Aktif Hari Ini</div>
-                <div className="text-2xl font-bold text-[#2563eb]">24</div>
-                <div className="text-green-600 text-sm font-semibold">+22 hadir</div>
-                <div className="text-red-500 text-sm font-semibold">-2 tidak hadir</div>
+              <div className="bg-white rounded-xl shadow border border-[#90E0EF] p-5 flex flex-col gap-2" style={{ boxShadow: '0 2px 12px 0 #90e0ef33' }}>
+                <div className="flex items-center gap-2 text-black font-semibold"><img src={MemberIcon} alt="Pekerja Aktif Hari Ini" className="w-6 h-6 object-contain" /> Pekerja Aktif Hari Ini</div>
+                <div className="text-2xl font-bold text-[#03045E]">24</div>
+                <div className="text-[#00B4D8] text-sm font-semibold">+22 hadir</div>
+                <div className="text-[#03045E] text-sm font-semibold">-2 tidak hadir</div>
               </div>
-              <div className="bg-white rounded-xl shadow border border-[#e5e7eb] p-5 flex flex-col gap-2">
-                <div className="flex items-center gap-2 text-[#2563eb] font-semibold"><img src={ReportIcon} alt="Laporan Masuk Hari Ini" className="w-6 h-6 object-contain" /> Laporan Masuk Hari Ini</div>
-                <div className="text-2xl font-bold text-[#f59e42]">7</div>
-                <div className="text-orange-500 text-sm font-semibold">3 penting</div>
+              <div className="bg-white rounded-xl shadow border border-[#90E0EF] p-5 flex flex-col gap-2" style={{ boxShadow: '0 2px 12px 0 #90e0ef33' }}>
+                <div className="flex items-center gap-2 text-black font-semibold"><img src={ReportIcon} alt="Laporan Masuk Hari Ini" className="w-6 h-6 object-contain" /> Laporan Masuk Hari Ini</div>
+                <div className="text-2xl font-bold text-[#03045E]">7</div>
+                <div className="text-[#0077B6] text-sm font-semibold">3 penting</div>
               </div>
-              <div className="bg-white rounded-xl shadow border border-[#e5e7eb] p-5 flex flex-col gap-2">
-                <div className="flex items-center gap-2 text-[#2563eb] font-semibold"><img src={GrowthIcon} alt="Rata-rata Kehadiran" className="w-6 h-6 object-contain" /> Rata-rata Kehadiran</div>
-                <div className="text-2xl font-bold text-[#2563eb]">89%</div>
-                <div className="text-green-600 text-sm font-semibold">+2.1% dari minggu lalu</div>
+              <div className="bg-white rounded-xl shadow border border-[#90E0EF] p-5 flex flex-col gap-2" style={{ boxShadow: '0 2px 12px 0 #90e0ef33' }}>
+                <div className="flex items-center gap-2 text-black font-semibold"><img src={GrowthIcon} alt="Rata-rata Kehadiran" className="w-6 h-6 object-contain" /> Rata-rata Kehadiran</div>
+                <div className="text-2xl font-bold text-[#03045E]">89%</div>
+                <div className="text-[#0077B6] text-sm font-semibold">+2.1% dari minggu lalu</div>
               </div>
-              <div className="bg-white rounded-xl shadow border border-[#e5e7eb] p-5 flex flex-col gap-2">
-                <div className="flex items-center gap-2 text-[#2563eb] font-semibold"><img src={CheckedIcon} alt="Tugas Terselesaikan" className="w-6 h-6 object-contain" /> Tugas Terselesaikan</div>
-                <div className="text-2xl font-bold text-[#2563eb]">156</div>
-                <div className="text-[#64748b] text-sm">Minggu ini</div>
+              <div className="bg-white rounded-xl shadow border border-[#90E0EF] p-5 flex flex-col gap-2" style={{ boxShadow: '0 2px 12px 0 #90e0ef33' }}>
+                <div className="flex items-center gap-2 text-black font-semibold"><img src={CheckedIcon} alt="Tugas Terselesaikan" className="w-6 h-6 object-contain" /> Tugas Terselesaikan</div>
+                <div className="text-2xl font-bold text-[#03045E]">156</div>
+                <div className="text-[#03045E] text-sm">Minggu ini</div>
               </div>
             </div>
             {/* Menu Cepat */}
             <div className="text-xl font-bold text-[#1e293b] mb-2">Menu Cepat</div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-              <div className="bg-white rounded-xl shadow border border-[#e5e7eb] p-6 flex flex-col items-center gap-2">
-                <img src={ReportIcon} alt="Tambah Tugas" className="w-14 h-14 bg-[#e0e7ff] rounded-lg p-2 object-contain" />
+              <div
+                className="bg-white rounded-xl shadow border border-[#e5e7eb] p-6 flex flex-col items-center gap-2 cursor-pointer hover:bg-blue-50 transition"
+                onClick={() => setSidebar('manajemen')}
+                title="Tambah Tugas"
+              >
+                <img src={ProjectManagementIcon} alt="Tambah Tugas" className="w-14 h-14 bg-[#e0e7ff] rounded-lg p-2 object-contain" />
                 <div className="font-bold text-base mt-2 text-[#1e293b]">Tambah Tugas</div>
                 <div className="text-[#64748b] text-sm mb-2">Buat tugas baru untuk pekerja</div>
               </div>
-              <div className="bg-white rounded-xl shadow border border-[#e5e7eb] p-6 flex flex-col items-center gap-2">
+              <div
+                className="bg-white rounded-xl shadow border border-[#e5e7eb] p-6 flex flex-col items-center gap-2 cursor-pointer hover:bg-blue-50 transition"
+                onClick={() => setSidebar('presensi')}
+                title="Generate QR"
+              >
                 <img src={QrScan} alt="Generate QR" className="w-14 h-14 bg-[#e0e7ff] rounded-lg p-2 object-contain" />
                 <div className="font-bold text-base mt-2 text-[#1e293b]">Generate QR</div>
                 <div className="text-[#64748b] text-sm mb-2">Buat QR code presensi</div>
               </div>
-              <div className="bg-white rounded-xl shadow border border-[#e5e7eb] p-6 flex flex-col items-center gap-2">
+              <div
+                className="bg-white rounded-xl shadow border border-[#e5e7eb] p-6 flex flex-col items-center gap-2 cursor-pointer hover:bg-blue-50 transition"
+                onClick={() => setSidebar('laporan')}
+                title="Cek Laporan"
+              >
                 <img src={ReportIcon} alt="Cek Laporan" className="w-14 h-14 bg-[#fff7ed] rounded-lg p-2 object-contain" />
                 <div className="font-bold text-base mt-2 text-[#1e293b]">Cek Laporan</div>
                 <div className="text-[#64748b] text-sm mb-2">Review laporan pekerja</div>
@@ -221,7 +236,7 @@ export default function DashboardSupervisi() {
         )}
         {sidebar === 'pekerja' && (
           <section>
-            <h2 className="text-xl font-semibold mb-4" style={{ color: '#223080' }}>Data Pekerja</h2>
+            <h1 className="text-2xl font-extrabold mb-4" style={{ color: '#223080', textShadow: '0 2px 8px #324AB233' }}>Data Pekerja</h1>
             <div className="flex items-center justify-between mb-4 gap-2 flex-wrap">
               <div className="flex gap-2">
                 <button
@@ -241,7 +256,7 @@ export default function DashboardSupervisi() {
                 onChange={e => setSearchPekerja(e.target.value)}
               />
             </div>
-            <div className="bg-white rounded-2xl shadow-lg p-6 overflow-x-auto">
+            <div className="bg-white rounded-2xl shadow-lg p-6 overflow-x-auto border border-[#90E0EF]" style={{ boxShadow: '0 2px 12px 0 #90e0ef33' }}>
               <table className="min-w-full text-sm text-left">
                 <thead>
                   <tr className="bg-[#F3F5FF] text-[#223080]">
@@ -257,7 +272,7 @@ export default function DashboardSupervisi() {
                   {sortedPekerja.map((p, i) => (
                     <tr key={p.id} className="border-b last:border-0 hover:bg-[#F3F5FF]">
                       <td className="px-4 py-2">{i + 1}</td>
-                      <td className="px-4 py-2 font-semibold">{p.nama}</td>
+                      <td className="px-4 py-2 font-semibold text-[#03045E]">Supardi</td>
                       <td className="px-4 py-2">{p.usia}</td>
                       <td className="px-4 py-2">{p.bidang}</td>
                       <td className="px-4 py-2">
@@ -280,6 +295,7 @@ export default function DashboardSupervisi() {
         )}
         {sidebar === 'presensi' && (
           <section className="flex flex-col gap-8 items-start">
+            <h1 className="text-2xl font-extrabold mb-4" style={{ color: '#223080', textShadow: '0 2px 8px #324AB233' }}>Presensi QR</h1>
             {/* Button Dummy Simulasi Jam */}
             <div className="flex gap-2 mb-2 justify-end">
               <button
@@ -396,6 +412,7 @@ export default function DashboardSupervisi() {
         )}
         {sidebar === 'manajemen' && (
           <section className="flex flex-col gap-8 items-start">
+            <h1 className="text-2xl font-extrabold mb-4" style={{ color: '#223080', textShadow: '0 2px 8px #324AB233' }}>Manajemen Tugas</h1>
             {/* Tab Navigasi */}
             <div className="flex gap-2 mb-4 bg-[#F3F5FF] rounded-xl p-2 shadow-sm">
               <button
@@ -478,7 +495,7 @@ export default function DashboardSupervisi() {
         )}
         {sidebar === 'laporan' && (
           <section>
-            <h2 className="text-xl font-semibold mb-4" style={{ color: '#223080' }}>Laporan Tugas Harian Pekerja</h2>
+            <h1 className="text-2xl font-extrabold mb-4" style={{ color: '#223080', textShadow: '0 2px 8px #324AB233' }}>Laporan Tugas Harian Pekerja</h1>
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-4">
               <input
                 type="text"
@@ -497,65 +514,114 @@ export default function DashboardSupervisi() {
                 <option value="status-selesai">Status: Selesai dulu</option>
                 <option value="status-dikerjakan">Status: Sedang Dikerjakan dulu</option>
               </select>
+              <select
+                className="px-4 py-2 rounded border border-blue-200 text-sm bg-white w-full md:w-48"
+                value={filterLaporan || 'all'}
+                onChange={e => setFilterLaporan(e.target.value)}
+              >
+                <option value="all">Semua Waktu</option>
+                <option value="today">Hari Ini</option>
+                <option value="this-week">Minggu Ini</option>
+                <option value="this-month">Bulan Ini</option>
+              </select>
             </div>
             <div className="flex flex-col gap-6">
-              {[
-                {
-                  id: 1,
-                  tugas: 'Pemeriksaan Peralatan',
-                  pekerja: 'Ahmad Rizki',
-                  status: 'Selesai',
-                  waktu: '10:30',
-                  catatan: 'Semua peralatan dalam kondisi baik. Tidak ada kerusakan ditemukan.',
-                  file: true
-                },
-                {
-                  id: 2,
-                  tugas: 'Pembersihan Area Kerja',
-                  pekerja: 'Ahmad Rizki',
-                  status: 'Selesai',
-                  waktu: '11:15',
-                  catatan: 'Area kerja sudah dibersihkan sesuai SOP. Semua limbah sudah dibuang dengan benar.',
-                  file: true
-                },
-                {
-                  id: 3,
-                  tugas: 'Laporan Harian',
-                  pekerja: 'Ahmad Rizki',
-                  status: 'Sedang Dikerjakan',
-                  waktu: '',
-                  catatan: '',
-                  file: false
-                },
-                {
-                  id: 4,
-                  tugas: 'Pemeriksaan Peralatan',
-                  pekerja: 'Siti Nurhaliza',
-                  status: 'Selesai',
-                  waktu: '09:45',
-                  catatan: 'Peralatan area B telah diperiksa. Ditemukan 1 alat yang perlu maintenance ringan.',
-                  file: true
-                }
-              ]
-                .filter(laporan =>
+              {(() => {
+                // Data laporan dummy dengan field tanggal
+                const laporanData = [
+                  {
+                    id: 1,
+                    tugas: 'Pemeriksaan Peralatan',
+                    pekerja: 'Ahmad Rizki',
+                    status: 'Selesai',
+                    waktu: '10:30',
+                    tanggal: '2025-07-07',
+                    catatan: 'Semua peralatan dalam kondisi baik. Tidak ada kerusakan ditemukan.',
+                    file: true
+                  },
+                  {
+                    id: 2,
+                    tugas: 'Pembersihan Area Kerja',
+                    pekerja: 'Ahmad Rizki',
+                    status: 'Selesai',
+                    waktu: '11:15',
+                    tanggal: '2025-07-06',
+                    catatan: 'Area kerja sudah dibersihkan sesuai SOP. Semua limbah sudah dibuang dengan benar.',
+                    file: true
+                  },
+                  {
+                    id: 3,
+                    tugas: 'Laporan Harian',
+                    pekerja: 'Ahmad Rizki',
+                    status: 'Sedang Dikerjakan',
+                    waktu: '',
+                    tanggal: '2025-07-01',
+                    catatan: '',
+                    file: false
+                  },
+                  {
+                    id: 4,
+                    tugas: 'Pemeriksaan Peralatan',
+                    pekerja: 'Siti Nurhaliza',
+                    status: 'Selesai',
+                    waktu: '09:45',
+                    tanggal: '2025-07-03',
+                    catatan: 'Peralatan area B telah diperiksa. Ditemukan 1 alat yang perlu maintenance ringan.',
+                    file: true
+                  },
+                  {
+                    id: 5,
+                    tugas: 'Laporan Inspeksi',
+                    pekerja: 'Budi Santoso',
+                    status: 'Selesai',
+                    waktu: '14:00',
+                    tanggal: '2025-07-22',
+                    catatan: 'Inspeksi area C selesai tanpa temuan.',
+                    file: true
+                  }
+                ];
+                // Filter waktu
+                let filtered = laporanData.filter(laporan =>
                   (!searchLaporan ||
                     laporan.pekerja.toLowerCase().includes(searchLaporan.toLowerCase()) ||
                     laporan.tugas.toLowerCase().includes(searchLaporan.toLowerCase())
                   )
-                )
-                .sort((a, b) => {
-                  if (sortLaporan === 'nama-asc') return a.pekerja.localeCompare(b.pekerja)
-                  if (sortLaporan === 'nama-desc') return b.pekerja.localeCompare(a.pekerja)
-                  if (sortLaporan === 'status-selesai') return a.status === b.status ? 0 : a.status === 'Selesai' ? -1 : 1
-                  if (sortLaporan === 'status-dikerjakan') return a.status === b.status ? 0 : a.status === 'Sedang Dikerjakan' ? -1 : 1
-                  return 0
-                })
-                .map((laporan, idx) => (
+                );
+                if (filterLaporan === 'today') {
+                  const today = new Date();
+                  const todayStr = today.toISOString().slice(0, 10);
+                  filtered = filtered.filter(l => l.tanggal === todayStr);
+                } else if (filterLaporan === 'this-week') {
+                  const today = new Date();
+                  const firstDay = new Date(today.setDate(today.getDate() - today.getDay()));
+                  const lastDay = new Date(today.setDate(firstDay.getDate() + 6));
+                  filtered = filtered.filter(l => {
+                    const tgl = new Date(l.tanggal);
+                    return tgl >= firstDay && tgl <= lastDay;
+                  });
+                } else if (filterLaporan === 'this-month') {
+                  const today = new Date();
+                  const month = today.getMonth();
+                  const year = today.getFullYear();
+                  filtered = filtered.filter(l => {
+                    const tgl = new Date(l.tanggal);
+                    return tgl.getMonth() === month && tgl.getFullYear() === year;
+                  });
+                }
+                // Sort
+                filtered = filtered.sort((a, b) => {
+                  if (sortLaporan === 'nama-asc') return a.pekerja.localeCompare(b.pekerja);
+                  if (sortLaporan === 'nama-desc') return b.pekerja.localeCompare(a.pekerja);
+                  if (sortLaporan === 'status-selesai') return a.status === b.status ? 0 : a.status === 'Selesai' ? -1 : 1;
+                  if (sortLaporan === 'status-dikerjakan') return a.status === b.status ? 0 : a.status === 'Sedang Dikerjakan' ? -1 : 1;
+                  return 0;
+                });
+                return filtered.map((laporan) => (
                   <div key={laporan.id} className="bg-white rounded-2xl shadow p-6 mb-2 relative">
                     <div className="flex items-center justify-between mb-2">
                       <div>
                         <div className="font-bold text-lg text-[#223080]">{laporan.tugas}</div>
-                        <div className="text-sm text-[#64748b]">Pekerja: {laporan.pekerja} {laporan.status === 'Selesai' && <span className="text-green-600 font-semibold ml-2">• Selesai: {laporan.waktu}</span>}</div>
+                        <div className="text-sm text-[#64748b]">Pekerja: {laporan.pekerja} {laporan.status === 'Selesai' && <span className="text-green-600 font-semibold ml-2">• Selesai: {laporan.waktu}</span>} <span className="ml-2 text-xs text-gray-400">{laporan.tanggal}</span></div>
                       </div>
                       <div>
                         {laporan.status === 'Selesai' ? (
@@ -580,7 +646,8 @@ export default function DashboardSupervisi() {
                       </button>
                     </div>
                   </div>
-                ))}
+                ));
+              })()}
             </div>
           </section>
         )}
