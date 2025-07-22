@@ -23,7 +23,7 @@ export default function LoginPage({ onLogin }: { onLogin: (username: string, pas
         <div className="flex flex-col items-center gap-2">
           <img src={LogoPantauin} alt="Logo Pantauin" className="w-20 h-20 mb-2 object-contain" />
           <h1 className="text-3xl font-extrabold text-[#324AB2] tracking-tight">Pantauin</h1>
-          <p className="text-gray-500 text-center text-base mt-1">Sistem Monitoring & Presensi Pekerja</p>
+          <p className="text-gray-500 text-center text-base mt-1">Monitoring & Presensi Pekerja</p>
         </div>
         <form onSubmit={handleSubmit} className="w-full flex flex-col gap-4 mt-2">
           <div>
