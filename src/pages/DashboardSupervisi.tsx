@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { QRCodeSVG } from 'qrcode.react'
-import LogoPantauin from '../assets/LogoPantauin.png'
+import LogoPantauin from '../assets/logoPantauin.png'
 import QrScan from '../assets/qr-scan.png'
 import HomeIcon from '../assets/home.png'
 import MemberIcon from '../assets/member.png'
