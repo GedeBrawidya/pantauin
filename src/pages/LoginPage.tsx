@@ -69,7 +69,7 @@ export default function LoginPage({ onLogin }: { onLogin: (username: string, pas
           <button className="text-[#324AB2] hover:underline text-sm font-semibold">Lupa kata sandi?</button>
         </div>
       </div>
-      <div className="mt-8 text-xs text-gray-400 text-center">&copy; 2025 Pantauin. Hak cipta dilindungi undang-undang.</div>
+      <div className="mt-8 text-xs text-gray-400 text-center">&copy; 2025 Pantauin. Hak cipta dilindungi</div>
     </div>
   )
 } 
