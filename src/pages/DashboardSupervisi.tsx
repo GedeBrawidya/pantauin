@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { QRCodeSVG } from 'qrcode.react'
-import LogoPantauin from '../assets/logoPantauin.png'
+import LogopantauinFix from '../assets/logopantauin-fix.png'
 import QrScan from '../assets/qr-scan.png'
 import HomeIcon from '../assets/home.png'
 import MemberIcon from '../assets/member.png'
@@ -91,7 +91,7 @@ export default function DashboardSupervisi() {
           <div>
             {/* Logo dan hamburger dalam satu baris, button minimize selalu tampil */}
             <div className={`flex items-center gap-2 mb-8 select-none transition-all duration-300`} style={{ minHeight: '48px' }}>
-              <img src={LogoPantauin} alt="Logo Pantauin" className="w-8 h-8 object-contain" />
+              <img src={LogopantauinFix} alt="Logo Pantauin" className="w-8 h-8 object-contain" />
               <span className="text-2xl font-bold tracking-wide whitespace-nowrap text-[#223080]">Pantauin</span>
             </div>
             {/* Sidebar */}
@@ -416,78 +416,127 @@ export default function DashboardSupervisi() {
             {/* Tab Navigasi */}
             <div className="flex gap-2 mb-4 bg-[#F3F5FF] rounded-xl p-2 shadow-sm">
               <button
-                className={`flex-1 py-3 rounded-lg font-bold text-base transition-all duration-200
-                  ${manajemenTab === 'assignment'
-                    ? ''
-                    : ''}`}
-                style={manajemenTab === 'assignment'
-                  ? { background: '#324AB2', color: 'white', boxShadow: '0 2px 8px #324AB233' }
-                  : { color: '#223080', background: 'transparent' }}
+                className={`flex-1 px-2 py-1 rounded-lg font-bold text-sm transition-all duration-200 whitespace-nowrap
+                  ${manajemenTab === 'assignment' ? 'bg-[#324AB2] text-white' : 'text-[#223080] bg-transparent hover:bg-[#e6eaff]'}
+                `}
+                style={{ minWidth: 0, maxWidth: 180 }}
                 onClick={() => setManajemenTab('assignment')}
               >Berikan Tugas</button>
               <button
-                className={`flex-1 py-3 rounded-lg font-bold text-base transition-all duration-200`}
-                style={manajemenTab === 'pantau'
-                  ? { background: '#324AB2', color: 'white', boxShadow: '0 2px 8px #324AB233' }
-                  : { color: '#223080', background: 'transparent' }}
+                className={`flex-1 px-2 py-1 rounded-lg font-bold text-sm transition-all duration-200 whitespace-nowrap
+                  ${manajemenTab === 'pantau' ? 'bg-[#324AB2] text-white' : 'text-[#223080] bg-transparent hover:bg-[#e6eaff]'}
+                `}
+                style={{ minWidth: 0, maxWidth: 180 }}
                 onClick={() => setManajemenTab('pantau')}
-              >Pantau Pekerja & Hasil Tugas</button>
+              >Pantau pekerjaan</button>
             </div>
             {/* Konten Tab */}
             {manajemenTab === 'assignment' && (
-              <div className="bg-white rounded-2xl shadow-lg p-8 flex flex-col gap-6">
+              <div className="bg-white rounded-2xl shadow-lg p-6 overflow-x-auto border border-[#90E0EF]" style={{ boxShadow: '0 2px 12px 0 #90e0ef33' }}>
                 <h3 className="font-bold text-lg mb-2" style={{ color: '#223080' }}>Berikan Tugas ke Pekerja</h3>
-                <div className="flex flex-col gap-2 max-h-40 overflow-y-auto">
-                  {DUMMY_PEGAWAI.map(p => (
-                    <label key={p.id} className="flex items-center gap-2">
-                      <input
-                        type="checkbox"
-                        checked={selectedPegawai.includes(p.id)}
-                        onChange={e => setSelectedPegawai(sel => e.target.checked ? [...sel, p.id] : sel.filter(id => id !== p.id))}
-                      />
-                      <span style={{ color: '#223080' }}>{p.nama}</span>
-                    </label>
-                  ))}
+                <table className="min-w-full text-sm text-left">
+                  <thead>
+                    <tr className="bg-[#F3F5FF] text-[#223080]">
+                      <th className="px-4 py-2 font-bold">No</th>
+                      <th className="px-4 py-2 font-bold">Nama</th>
+                      <th className="px-4 py-2 font-bold">Usia</th>
+                      <th className="px-4 py-2 font-bold">Bidang</th>
+                      <th className="px-4 py-2 font-bold">Status</th>
+                      <th className="px-4 py-2 font-bold">Checklist</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {DUMMY_PEGAWAI.map((p, i) => (
+                      <tr key={p.id} className="border-b last:border-0 hover:bg-[#F3F5FF]">
+                        <td className="px-4 py-2">{i + 1}</td>
+                        <td className="px-4 py-2 font-semibold text-[#03045E]">{p.nama}</td>
+                        <td className="px-4 py-2">{p.usia}</td>
+                        <td className="px-4 py-2">{p.bidang}</td>
+                        <td className="px-4 py-2">
+                          <span className={`px-3 py-1 rounded-full text-xs font-bold ${p.status === 'Hadir' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-600'}`}>{p.status}</span>
+                        </td>
+                        <td className="px-4 py-2 text-center">
+                          <input
+                            type="checkbox"
+                            checked={selectedPegawai.includes(p.id)}
+                            onChange={e => setSelectedPegawai(sel => e.target.checked ? [...sel, p.id] : sel.filter(id => id !== p.id))}
+                          />
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+                <div className="flex flex-col md:flex-row gap-2 mt-4 items-center">
+                  <input
+                    type="text"
+                    className="border rounded px-3 py-2 border-primary/30 focus:ring-2 focus:ring-primary-dark outline-none text-sm"
+                    style={{ borderColor: '#A5B4FC', maxWidth: 320 }}
+                    placeholder="Jenis tugas..."
+                    value={jenisTugas}
+                    onChange={e => setJenisTugas(e.target.value)}
+                  />
+                  <button
+                    className="px-4 py-2 rounded font-semibold text-sm transition-all duration-200 shadow"
+                    style={{ background: '#324AB2', color: 'white', minWidth: 120 }}
+                    disabled={selectedPegawai.length === 0 || !jenisTugas}
+                    onClick={handleAssignTugas}
+                  >Berikan Tugas</button>
                 </div>
-                <input
-                  type="text"
-                  className="border rounded px-3 py-2 mt-2 border-primary/30 focus:ring-2 focus:ring-primary-dark outline-none"
-                  style={{ borderColor: '#A5B4FC' }}
-                  placeholder="Jenis tugas..."
-                  value={jenisTugas}
-                  onChange={e => setJenisTugas(e.target.value)}
-                />
-                <button
-                  className="w-full py-2 rounded font-semibold transition-all duration-200 shadow mt-2"
-                  style={{ background: '#324AB2', color: 'white' }}
-                  disabled={selectedPegawai.length === 0 || !jenisTugas}
-                  onClick={handleAssignTugas}
-                >
-                  Berikan Tugas
-                </button>
               </div>
             )}
             {manajemenTab === 'pantau' && (
-              <div className="bg-white rounded-2xl shadow-lg p-8 flex flex-col gap-6">
+              <div className="bg-white rounded-2xl shadow-lg p-6 overflow-x-auto border border-[#90E0EF]" style={{ boxShadow: '0 2px 12px 0 #90e0ef33' }}>
                 <h3 className="font-bold text-lg mb-2" style={{ color: '#223080' }}>Pantau Pekerja & Hasil Tugas</h3>
-                <div className="flex flex-col gap-2 max-h-40 overflow-y-auto">
-                  {DUMMY_PEGAWAI.map(p => (
-                    <div key={p.id} className="flex items-center gap-2 cursor-pointer hover:underline" onClick={() => setDetailPegawai(p)}>
-                      <span className="font-semibold" style={{ color: '#223080' }}>{p.nama}</span>
-                      <span className="text-xs" style={{ color: '#A5B4FC' }}>(lihat detail tugas)</span>
-                    </div>
-                  ))}
-                </div>
+                <table className="min-w-full text-sm text-left mb-4">
+                  <thead>
+                    <tr className="bg-[#F3F5FF] text-[#223080]">
+                      <th className="px-4 py-2 font-bold">No</th>
+                      <th className="px-4 py-2 font-bold">Nama</th>
+                      <th className="px-4 py-2 font-bold">Usia</th>
+                      <th className="px-4 py-2 font-bold">Bidang</th>
+                      <th className="px-4 py-2 font-bold">Status</th>
+                      <th className="px-4 py-2 font-bold">Aksi</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {DUMMY_PEGAWAI.map((p, i) => (
+                      <tr key={p.id} className="border-b last:border-0 hover:bg-[#F3F5FF]">
+                        <td className="px-4 py-2">{i + 1}</td>
+                        <td className="px-4 py-2 font-semibold text-[#03045E]">{p.nama}</td>
+                        <td className="px-4 py-2">{p.usia}</td>
+                        <td className="px-4 py-2">{p.bidang}</td>
+                        <td className="px-4 py-2">
+                          <span className={`px-3 py-1 rounded-full text-xs font-bold ${p.status === 'Hadir' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-600'}`}>{p.status}</span>
+                        </td>
+                        <td className="px-4 py-2">
+                          <button className="px-3 py-1 rounded bg-[#324AB2] text-white text-xs font-semibold hover:bg-[#223080] transition" onClick={() => setDetailPegawai(p)}>Detail</button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
                 <div className="mt-4">
                   <div className="font-semibold mb-1" style={{ color: '#223080' }}>Hasil Tugas Selesai:</div>
-                  <div className="flex flex-col gap-2 max-h-32 overflow-y-auto">
-                    {DUMMY_HASIL.map(h => (
-                      <div key={h.id} className="border rounded p-2 flex flex-col gap-1" style={{ background: '#F3F5FF', borderColor: '#A5B4FC' }}>
-                        <div className="font-semibold" style={{ color: '#324AB2' }}>{h.nama} - {h.tugas}</div>
-                        <div className="text-xs" style={{ color: '#22308099' }}>Catatan: {h.catatan}</div>
-                      </div>
-                    ))}
-                  </div>
+                  <table className="min-w-full text-sm text-left">
+                    <thead>
+                      <tr className="bg-[#F3F5FF] text-[#223080]">
+                        <th className="px-4 py-2 font-bold">No</th>
+                        <th className="px-4 py-2 font-bold">Nama</th>
+                        <th className="px-4 py-2 font-bold">Tugas</th>
+                        <th className="px-4 py-2 font-bold">Catatan</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {DUMMY_HASIL.map((h, i) => (
+                        <tr key={h.id} className="border-b last:border-0 hover:bg-[#F3F5FF]">
+                          <td className="px-4 py-2">{i + 1}</td>
+                          <td className="px-4 py-2 font-semibold text-[#03045E]">{h.nama}</td>
+                          <td className="px-4 py-2">{h.tugas}</td>
+                          <td className="px-4 py-2 text-xs text-[#22308099]">{h.catatan}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
                 </div>
               </div>
             )}
