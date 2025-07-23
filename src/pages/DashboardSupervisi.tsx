@@ -10,6 +10,7 @@ import CheckedIcon from '../assets/checked.png'
 import ProjectManagementIcon from '../assets/project-management.png'
 
 
+
 const DUMMY_PEGAWAI = [
   { id: 1, nama: 'Supardi', usia: 32, bidang: 'Teknik', status: 'Hadir' },
   { id: 2, nama: 'Budi Santoso', usia: 28, bidang: 'Bangunan', status: 'Tidak Hadir' },
@@ -70,7 +71,7 @@ export default function DashboardSupervisi() {
 
   useEffect(() => {
     setLoadingTasks(true);
-    fetch('http://20.205.22.220:3000/api/tasks')
+    fetch(import.meta.env.VITE_BASEURL + '/api/tasks')
       .then(res => res.json())
       .then(data => {
         setTasks(data.data || []);
@@ -84,7 +85,7 @@ export default function DashboardSupervisi() {
 
   useEffect(() => {
     setLoadingWorker(true);
-    fetch('http://20.205.22.220:3000/api/workers/')
+    fetch(import.meta.env.VITE_BASEURL + '/api/workers/')
       .then(res => res.json())
       .then(data => {
         // Data: { data: { data: [{ total_worker: 2 }] } }
@@ -99,7 +100,7 @@ export default function DashboardSupervisi() {
   useEffect(() => {
     if (sidebar === 'pekerja') {
       setLoadingWorkers(true);
-      fetch('http://20.205.22.220:3000/api/workers/all')
+      fetch(import.meta.env.VITE_BASEURL + '/api/workers/all')
         .then(res => res.json())
         .then(data => {
           setWorkers(data.data?.data || []);
@@ -115,7 +116,7 @@ export default function DashboardSupervisi() {
   useEffect(() => {
     if (sidebar === 'dashboard') {
       setLoadingActivities(true);
-      fetch('http://20.205.22.220:3000/api/workers/tasks')
+      fetch(import.meta.env.VITE_BASEURL + '/api/workers/tasks')
         .then(res => res.json())
         .then(data => {
           setRecentActivities(data.data || []);
