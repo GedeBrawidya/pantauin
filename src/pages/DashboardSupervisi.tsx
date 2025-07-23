@@ -1,12 +1,10 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { QRCodeSVG } from 'qrcode.react'
 import LogopantauinFix from '../assets/logopantauin-fix.png'
 import QrScan from '../assets/qr-scan.png'
 import HomeIcon from '../assets/home.png'
 import MemberIcon from '../assets/member.png'
 import ReportIcon from '../assets/report.png'
-import VisibilityIcon from '../assets/visibility.png'
-import DownloadIcon from '../assets/downloads.png'
 import GrowthIcon from '../assets/growth.png'
 import CheckedIcon from '../assets/checked.png'
 import ProjectManagementIcon from '../assets/project-management.png'
@@ -60,6 +58,41 @@ export default function DashboardSupervisi() {
   const [searchLaporan, setSearchLaporan] = useState('');
   const [sortLaporan, setSortLaporan] = useState('nama-asc');
   const [filterLaporan, setFilterLaporan] = useState('all');
+  // Tambahkan state untuk tasks
+  const [tasks, setTasks] = useState<any[]>([]);
+  const [loadingTasks, setLoadingTasks] = useState(true);
+  const [errorTasks, setErrorTasks] = useState<string | null>(null);
+  // Tambahkan state untuk totalWorker
+  const [totalWorker, setTotalWorker] = useState<number | null>(null);
+  const [loadingWorker, setLoadingWorker] = useState(true);
+
+  useEffect(() => {
+    setLoadingTasks(true);
+    fetch('http://20.205.22.220:3000/api/tasks')
+      .then(res => res.json())
+      .then(data => {
+        setTasks(data.data || []);
+        setLoadingTasks(false);
+      })
+      .catch(() => {
+        setErrorTasks('Gagal memuat data tugas');
+        setLoadingTasks(false);
+      });
+  }, []);
+
+  useEffect(() => {
+    setLoadingWorker(true);
+    fetch('http://20.205.22.220:3000/api/workers/')
+      .then(res => res.json())
+      .then(data => {
+        // Data: { data: { data: [{ total_worker: 2 }] } }
+        setTotalWorker(data.data?.data?.[0]?.total_worker ?? null);
+        setLoadingWorker(false);
+      })
+      .catch(() => {
+        setLoadingWorker(false);
+      });
+  }, []);
 
   function handleAssignTugas() {
     setSelectedPegawai([])
@@ -160,14 +193,18 @@ export default function DashboardSupervisi() {
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4 my-6">
               <div className="bg-white rounded-xl shadow border border-[#90E0EF] p-5 flex flex-col gap-2" style={{ boxShadow: '0 2px 12px 0 #90e0ef33' }}>
                 <div className="flex items-center gap-2 text-black font-semibold"><img src={MemberIcon} alt="Pekerja Aktif Hari Ini" className="w-6 h-6 object-contain" /> Pekerja Aktif Hari Ini</div>
-                <div className="text-2xl font-bold text-[#03045E]">24</div>
-                <div className="text-[#00B4D8] text-sm font-semibold">+22 hadir</div>
-                <div className="text-[#03045E] text-sm font-semibold">-2 tidak hadir</div>
+                <div className="text-2xl font-bold text-[#03045E]">
+                  {loadingWorker ? '...' : (totalWorker !== null ? totalWorker : '0')}
+                </div>
+                <div className="text-[#00B4D8] text-sm font-semibold">+{totalWorker !== null ? totalWorker : 0} hadir</div>
+                <div className="text-[#03045E] text-sm font-semibold">- tidak hadir</div>
               </div>
               <div className="bg-white rounded-xl shadow border border-[#90E0EF] p-5 flex flex-col gap-2" style={{ boxShadow: '0 2px 12px 0 #90e0ef33' }}>
-                <div className="flex items-center gap-2 text-black font-semibold"><img src={ReportIcon} alt="Laporan Masuk Hari Ini" className="w-6 h-6 object-contain" /> Laporan Masuk Hari Ini</div>
-                <div className="text-2xl font-bold text-[#03045E]">7</div>
-                <div className="text-[#0077B6] text-sm font-semibold">3 penting</div>
+                <div className="flex items-center gap-2 text-black font-semibold"><img src={ReportIcon} alt="Laporan Masuk Hari Ini" className="w-6 h-6 object-contain" /> Laporan Masuk</div>
+                <div className="text-2xl font-bold text-[#03045E]">
+                  {loadingTasks ? '...' : tasks.length}
+                </div>
+                <div className="text-[#0077B6] text-sm font-semibold">{loadingTasks ? '' : `${tasks.length} laporan`}</div>
               </div>
               <div className="bg-white rounded-xl shadow border border-[#90E0EF] p-5 flex flex-col gap-2" style={{ boxShadow: '0 2px 12px 0 #90e0ef33' }}>
                 <div className="flex items-center gap-2 text-black font-semibold"><img src={GrowthIcon} alt="Rata-rata Kehadiran" className="w-6 h-6 object-contain" /> Rata-rata Kehadiran</div>
@@ -176,7 +213,9 @@ export default function DashboardSupervisi() {
               </div>
               <div className="bg-white rounded-xl shadow border border-[#90E0EF] p-5 flex flex-col gap-2" style={{ boxShadow: '0 2px 12px 0 #90e0ef33' }}>
                 <div className="flex items-center gap-2 text-black font-semibold"><img src={CheckedIcon} alt="Tugas Terselesaikan" className="w-6 h-6 object-contain" /> Tugas Terselesaikan</div>
-                <div className="text-2xl font-bold text-[#03045E]">156</div>
+                <div className="text-2xl font-bold text-[#03045E]">
+                  {loadingTasks ? '...' : tasks.filter(t => t.status === 'done').length}
+                </div>
                 <div className="text-[#03045E] text-sm">Minggu ini</div>
               </div>
             </div>
@@ -575,128 +614,38 @@ export default function DashboardSupervisi() {
               </select>
             </div>
             <div className="flex flex-col gap-6">
-              {(() => {
-                // Data laporan dummy dengan field tanggal
-                const laporanData = [
-                  {
-                    id: 1,
-                    tugas: 'Pemeriksaan Peralatan',
-                    pekerja: 'Ahmad Rizki',
-                    status: 'Selesai',
-                    waktu: '10:30',
-                    tanggal: '2025-07-07',
-                    catatan: 'Semua peralatan dalam kondisi baik. Tidak ada kerusakan ditemukan.',
-                    file: true
-                  },
-                  {
-                    id: 2,
-                    tugas: 'Pembersihan Area Kerja',
-                    pekerja: 'Ahmad Rizki',
-                    status: 'Selesai',
-                    waktu: '11:15',
-                    tanggal: '2025-07-06',
-                    catatan: 'Area kerja sudah dibersihkan sesuai SOP. Semua limbah sudah dibuang dengan benar.',
-                    file: true
-                  },
-                  {
-                    id: 3,
-                    tugas: 'Laporan Harian',
-                    pekerja: 'Ahmad Rizki',
-                    status: 'Sedang Dikerjakan',
-                    waktu: '',
-                    tanggal: '2025-07-01',
-                    catatan: '',
-                    file: false
-                  },
-                  {
-                    id: 4,
-                    tugas: 'Pemeriksaan Peralatan',
-                    pekerja: 'Siti Nurhaliza',
-                    status: 'Selesai',
-                    waktu: '09:45',
-                    tanggal: '2025-07-03',
-                    catatan: 'Peralatan area B telah diperiksa. Ditemukan 1 alat yang perlu maintenance ringan.',
-                    file: true
-                  },
-                  {
-                    id: 5,
-                    tugas: 'Laporan Inspeksi',
-                    pekerja: 'Budi Santoso',
-                    status: 'Selesai',
-                    waktu: '14:00',
-                    tanggal: '2025-07-22',
-                    catatan: 'Inspeksi area C selesai tanpa temuan.',
-                    file: true
-                  }
-                ];
-                // Filter waktu
-                let filtered = laporanData.filter(laporan =>
-                  (!searchLaporan ||
-                    laporan.pekerja.toLowerCase().includes(searchLaporan.toLowerCase()) ||
-                    laporan.tugas.toLowerCase().includes(searchLaporan.toLowerCase())
-                  )
-                );
-                if (filterLaporan === 'today') {
-                  const today = new Date();
-                  const todayStr = today.toISOString().slice(0, 10);
-                  filtered = filtered.filter(l => l.tanggal === todayStr);
-                } else if (filterLaporan === 'this-week') {
-                  const today = new Date();
-                  const firstDay = new Date(today.setDate(today.getDate() - today.getDay()));
-                  const lastDay = new Date(today.setDate(firstDay.getDate() + 6));
-                  filtered = filtered.filter(l => {
-                    const tgl = new Date(l.tanggal);
-                    return tgl >= firstDay && tgl <= lastDay;
-                  });
-                } else if (filterLaporan === 'this-month') {
-                  const today = new Date();
-                  const month = today.getMonth();
-                  const year = today.getFullYear();
-                  filtered = filtered.filter(l => {
-                    const tgl = new Date(l.tanggal);
-                    return tgl.getMonth() === month && tgl.getFullYear() === year;
-                  });
-                }
-                // Sort
-                filtered = filtered.sort((a, b) => {
-                  if (sortLaporan === 'nama-asc') return a.pekerja.localeCompare(b.pekerja);
-                  if (sortLaporan === 'nama-desc') return b.pekerja.localeCompare(a.pekerja);
-                  if (sortLaporan === 'status-selesai') return a.status === b.status ? 0 : a.status === 'Selesai' ? -1 : 1;
-                  if (sortLaporan === 'status-dikerjakan') return a.status === b.status ? 0 : a.status === 'Sedang Dikerjakan' ? -1 : 1;
-                  return 0;
-                });
-                return filtered.map((laporan) => (
-                  <div key={laporan.id} className="bg-white rounded-2xl shadow p-6 mb-2 relative">
+              {loadingTasks ? (
+                <div>Loading laporan tugas...</div>
+              ) : errorTasks ? (
+                <div className="text-red-500">{errorTasks}</div>
+              ) : tasks.length === 0 ? (
+                <div>Tidak ada data tugas.</div>
+              ) : (
+                tasks.map((task) => (
+                  <div key={task.id} className="bg-white rounded-2xl shadow p-6 mb-2 relative">
                     <div className="flex items-center justify-between mb-2">
                       <div>
-                        <div className="font-bold text-lg text-[#223080]">{laporan.tugas}</div>
-                        <div className="text-sm text-[#64748b]">Pekerja: {laporan.pekerja} {laporan.status === 'Selesai' && <span className="text-green-600 font-semibold ml-2">• Selesai: {laporan.waktu}</span>} <span className="ml-2 text-xs text-gray-400">{laporan.tanggal}</span></div>
+                        <div className="font-bold text-lg text-[#223080]">{task.title}</div>
+                        <div className="text-sm text-[#64748b]">
+                          Deadline: {new Date(task.deadline).toLocaleDateString()} 
+                          <span className="ml-2 text-xs text-gray-400">{task.status}</span>
+                        </div>
                       </div>
                       <div>
-                        {laporan.status === 'Selesai' ? (
-                          <span className="px-4 py-1 rounded-full bg-blue-500 text-white text-sm font-bold absolute top-6 right-6">Selesai</span>
-                        ) : (
-                          <span className="px-4 py-1 rounded-full bg-gray-200 text-gray-700 text-sm font-bold absolute top-6 right-6">Sedang Dikerjakan</span>
-                        )}
+                        <span className={`px-4 py-1 rounded-full ${task.status === 'done' ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-700'} text-sm font-bold absolute top-6 right-6`}>
+                          {task.status}
+                        </span>
                       </div>
                     </div>
                     <div className="bg-[#f3f5ff] rounded-lg p-4 mb-3 flex items-start gap-2">
                       <div>
-                        <div className="font-semibold text-[#223080] mb-1">Catatan:</div>
-                        <div className="text-[#223080] text-sm">{laporan.catatan || <span className="italic text-gray-400">Belum ada catatan.</span>}</div>
+                        <div className="font-semibold text-[#223080] mb-1">Deskripsi:</div>
+                        <div className="text-[#223080] text-sm">{task.description}</div>
                       </div>
                     </div>
-                    <div className="flex gap-2 mt-2">
-                      <button className="flex items-center gap-1 px-4 py-2 rounded border border-gray-300 bg-gray-50 text-gray-700 font-semibold text-sm hover:bg-gray-100 transition" disabled={!laporan.file}>
-                        <img src={VisibilityIcon} alt="Lihat File" className="w-5 h-5 object-contain align-middle" /> Lihat File
-                      </button>
-                      <button className="flex items-center gap-1 px-4 py-2 rounded border border-gray-300 bg-gray-50 text-gray-700 font-semibold text-sm hover:bg-gray-100 transition" disabled={!laporan.file}>
-                        <img src={DownloadIcon} alt="Download" className="w-5 h-5 object-contain align-middle" /> Download
-                      </button>
-                    </div>
                   </div>
-                ));
-              })()}
+                ))
+              )}
             </div>
           </section>
         )}
