@@ -43,10 +43,6 @@ export default function PresensiPage({ onSuccess }: { onSuccess?: (result?: stri
           className="px-4 py-2 rounded bg-blue-600 text-white font-semibold hover:bg-blue-700 transition"
           disabled={scanning}
         >{scanning ? 'Scanning...' : 'Scan Ulang'}</button>
-        <button
-          onClick={() => onSuccess && onSuccess('dummy-presensi')}
-          className="px-4 py-2 rounded bg-green-600 text-white font-semibold hover:bg-green-700 transition mt-2"
-        >Simulasi Presensi Berhasil</button>
       </div>
     </div>
   )

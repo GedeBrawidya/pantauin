@@ -32,7 +32,7 @@ const SIDEBAR_MENU = [
 ]
 
 export default function DashboardSupervisi() {
-  const [sidebar, setSidebar] = useState('pekerja')
+  const [sidebar, setSidebar] = useState('dashboard')
   const [manajemenTab, setManajemenTab] = useState<'assignment' | 'pantau'>('assignment')
   const [selectedPegawai, setSelectedPegawai] = useState<number[]>([])
   const [jenisTugas, setJenisTugas] = useState('')
