@@ -2,6 +2,8 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import CheckedIcon from '../assets/checked.png'
 import ReportIcon from '../assets/report.png'
+import UploadIcon from '../assets/upload.png'
+import CorrectIcon from '../assets/correct.png'
 
 const DUMMY_TUGAS = [
   {
@@ -91,7 +93,7 @@ export default function TugasHarianPage() {
                 <div className="flex gap-2 mt-2 items-center">
                   {/* Custom Upload Button, konsisten dengan DashboardPekerja */}
                   <label className="flex items-center gap-2 px-4 py-2 rounded border border-blue-200 bg-blue-50 text-blue-700 font-semibold text-sm hover:bg-blue-100 transition cursor-pointer w-fit">
-                    <span className="material-icons text-base">upload</span> Upload Foto/Dokumen
+                    <img src={UploadIcon} alt="Upload" className="w-5 h-5" /> Upload Foto/Dokumen
                     <input
                       type="file"
                       className="hidden"
@@ -108,7 +110,7 @@ export default function TugasHarianPage() {
                     disabled={!catatan[tugas.id] || !files[tugas.id] || !!selesai[tugas.id]}
                     onClick={() => setSelesai(s => ({ ...s, [tugas.id]: true }))}
                   >
-                    <span className="material-icons text-base">check_circle</span> Selesai
+                    <img src={CorrectIcon} alt="Selesai" className="w-5 h-5" /> Selesai
                   </button>
                 </div>
               </div>
