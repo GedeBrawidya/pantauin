@@ -43,17 +43,16 @@ export default function DashboardSupervisi() {
   const [qrForm, setQrForm] = useState({ nama: '', detail: '', tanggal: '' });
   const [qrFormSubmitted, setQrFormSubmitted] = useState(false);
   const isQrFormValid = qrForm.nama && qrForm.detail && qrForm.tanggal;
-  // Simulasi waktu sekarang (bisa diganti dengan new Date() jika ingin real time)
   const [dummyJam, setDummyJam] = useState<number | null>(null);
   const now = new Date();
   const jam = dummyJam !== null ? dummyJam : now.getHours();
   const menit = now.getMinutes();
   const isAfter17 = jam > 17 || (jam === 17 && menit >= 0);
-  // Untuk demo, bisa ganti jam di atas dengan const jam = 16; atau 18;
   const [searchPekerja, setSearchPekerja] = useState('');
   const [sortAsc, setSortAsc] = useState(true);
-  const filteredPekerja = DUMMY_PEGAWAI.filter(p => p.nama.toLowerCase().includes(searchPekerja.toLowerCase()));
-  const sortedPekerja = [...filteredPekerja].sort((a, b) => sortAsc ? a.nama.localeCompare(b.nama) : b.nama.localeCompare(a.nama));
+  const [workers, setWorkers] = useState<any[]>([]);
+  const [loadingWorkers, setLoadingWorkers] = useState(true);
+  const [errorWorkers, setErrorWorkers] = useState<string | null>(null);
   const [sidebarOpen ] = useState(true);
   const [searchLaporan, setSearchLaporan] = useState('');
   const [sortLaporan, setSortLaporan] = useState('nama-asc');
@@ -65,6 +64,9 @@ export default function DashboardSupervisi() {
   // Tambahkan state untuk totalWorker
   const [totalWorker, setTotalWorker] = useState<number | null>(null);
   const [loadingWorker, setLoadingWorker] = useState(true);
+  const [recentActivities, setRecentActivities] = useState<any[]>([]);
+  const [loadingActivities, setLoadingActivities] = useState(true);
+  const [errorActivities, setErrorActivities] = useState<string | null>(null);
 
   useEffect(() => {
     setLoadingTasks(true);
@@ -94,6 +96,38 @@ export default function DashboardSupervisi() {
       });
   }, []);
 
+  useEffect(() => {
+    if (sidebar === 'pekerja') {
+      setLoadingWorkers(true);
+      fetch('http://20.205.22.220:3000/api/workers/all')
+        .then(res => res.json())
+        .then(data => {
+          setWorkers(data.data?.data || []);
+          setLoadingWorkers(false);
+        })
+        .catch(() => {
+          setErrorWorkers('Gagal memuat data pekerja');
+          setLoadingWorkers(false);
+        });
+    }
+  }, [sidebar]);
+
+  useEffect(() => {
+    if (sidebar === 'dashboard') {
+      setLoadingActivities(true);
+      fetch('http://20.205.22.220:3000/api/workers/tasks')
+        .then(res => res.json())
+        .then(data => {
+          setRecentActivities(data.data || []);
+          setLoadingActivities(false);
+        })
+        .catch(() => {
+          setErrorActivities('Gagal memuat aktivitas terbaru');
+          setLoadingActivities(false);
+        });
+    }
+  }, [sidebar]);
+
   function handleAssignTugas() {
     setSelectedPegawai([])
     setJenisTugas('')
@@ -112,6 +146,9 @@ export default function DashboardSupervisi() {
       reader.readAsDataURL(f)
     }
   }
+
+  const filteredWorkers = workers.filter((p: any) => p.name.toLowerCase().includes(searchPekerja.toLowerCase()));
+  const sortedWorkers = [...filteredWorkers].sort((a, b) => sortAsc ? a.name.localeCompare(b.name) : b.name.localeCompare(a.name));
 
   return (
     <div className="min-h-screen flex font-sans" style={{ background: '#fff' }}>
@@ -214,9 +251,9 @@ export default function DashboardSupervisi() {
               <div className="bg-white rounded-xl shadow border border-[#90E0EF] p-5 flex flex-col gap-2" style={{ boxShadow: '0 2px 12px 0 #90e0ef33' }}>
                 <div className="flex items-center gap-2 text-black font-semibold"><img src={CheckedIcon} alt="Tugas Terselesaikan" className="w-6 h-6 object-contain" /> Tugas Terselesaikan</div>
                 <div className="text-2xl font-bold text-[#03045E]">
-                  {loadingTasks ? '...' : tasks.filter(t => t.status === 'done').length}
+                  {loadingTasks ? '...' : tasks.filter(t => t.status === 'completed').length}
                 </div>
-                <div className="text-[#03045E] text-sm">Minggu ini</div>
+                <div className="text-[#03045E] text-sm">All Time</div>
               </div>
             </div>
             {/* Menu Cepat */}
@@ -253,23 +290,22 @@ export default function DashboardSupervisi() {
             {/* Aktivitas Terbaru */}
             <div className="bg-white rounded-xl shadow border border-[#e5e7eb] p-6">
               <div className="text-xl font-bold text-[#1e293b] mb-4">Aktivitas Terbaru</div>
-              <div className="flex flex-col gap-3">
-                <div className="flex items-center gap-2 bg-[#f1f5f9] rounded-lg px-4 py-3">
-                  <span className="w-2 h-2 rounded-full bg-green-500 inline-block"></span>
-                  <span className="text-[#1e293b]">Ahmad Rizki telah menyelesaikan tugas "Pembersihan Area A"</span>
-                  <span className="text-xs text-[#64748b] ml-auto">5 menit yang lalu</span>
+              {loadingActivities ? (
+                <div className="text-blue-600 font-semibold py-4 text-center">Loading aktivitas...</div>
+              ) : errorActivities ? (
+                <div className="text-red-500 font-semibold py-4 text-center">{errorActivities}</div>
+              ) : recentActivities.length === 0 ? (
+                <div className="text-gray-400 font-semibold py-4 text-center">Belum ada aktivitas.</div>
+              ) : (
+                <div className="flex flex-col gap-3">
+                  {recentActivities.map((act: any, idx: number) => (
+                    <div key={idx} className="flex items-center gap-2 bg-[#f1f5f9] rounded-lg px-4 py-3">
+                      <span className="w-2 h-2 rounded-full bg-green-500 inline-block"></span>
+                      <span className="text-[#1e293b]">{act.worker_name} mengerjakan "{act.task_name}"</span>
+                    </div>
+                  ))}
                 </div>
-                <div className="flex items-center gap-2 bg-[#f1f5f9] rounded-lg px-4 py-3">
-                  <span className="w-2 h-2 rounded-full bg-orange-500 inline-block"></span>
-                  <span className="text-[#1e293b]">Laporan baru: "Kerusakan Peralatan" oleh Siti Nurhaliza</span>
-                  <span className="text-xs text-[#64748b] ml-auto">15 menit yang lalu</span>
-                </div>
-                <div className="flex items-center gap-2 bg-[#f1f5f9] rounded-lg px-4 py-3">
-                  <span className="w-2 h-2 rounded-full bg-blue-500 inline-block"></span>
-                  <span className="text-[#1e293b]">3 pekerja baru telah melakukan presensi masuk</span>
-                  <span className="text-xs text-[#64748b] ml-auto">30 menit yang lalu</span>
-                </div>
-              </div>
+              )}
             </div>
           </section>
         )}
@@ -296,39 +332,36 @@ export default function DashboardSupervisi() {
               />
             </div>
             <div className="bg-white rounded-2xl shadow-lg p-6 overflow-x-auto border border-[#90E0EF]" style={{ boxShadow: '0 2px 12px 0 #90e0ef33' }}>
-              <table className="min-w-full text-sm text-left">
-                <thead>
-                  <tr className="bg-[#F3F5FF] text-[#223080]">
-                    <th className="px-4 py-2 font-bold">No</th>
-                    <th className="px-4 py-2 font-bold">Nama</th>
-                    <th className="px-4 py-2 font-bold">Usia</th>
-                    <th className="px-4 py-2 font-bold">Bidang</th>
-                    <th className="px-4 py-2 font-bold">Status</th>
-                    <th className="px-4 py-2 font-bold">Action</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {sortedPekerja.map((p, i) => (
-                    <tr key={p.id} className="border-b last:border-0 hover:bg-[#F3F5FF]">
-                      <td className="px-4 py-2">{i + 1}</td>
-                      <td className="px-4 py-2 font-semibold text-[#03045E]">Supardi</td>
-                      <td className="px-4 py-2">{p.usia}</td>
-                      <td className="px-4 py-2">{p.bidang}</td>
-                      <td className="px-4 py-2">
-                        <span className={`px-3 py-1 rounded-full text-xs font-bold ${p.status === 'Hadir' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-600'}`}>{p.status}</span>
-                      </td>
-                      <td className="px-4 py-2 flex gap-2">
-                        <button className="px-3 py-1 rounded bg-[#324AB2] text-white text-xs font-semibold hover:bg-[#223080] transition">Edit</button>
-                        {p.status === 'Hadir' ? (
-                          <button className="px-3 py-1 rounded bg-red-100 text-red-600 text-xs font-semibold hover:bg-red-200 transition">Deactivate</button>
-                        ) : (
-                          <button className="px-3 py-1 rounded bg-green-100 text-green-700 text-xs font-semibold hover:bg-green-200 transition">Activate</button>
-                        )}
-                      </td>
+              {loadingWorkers ? (
+                <div className="text-center text-blue-600 font-semibold py-8">Loading data pekerja...</div>
+              ) : errorWorkers ? (
+                <div className="text-center text-red-500 font-semibold py-8">{errorWorkers}</div>
+              ) : (
+                <table className="min-w-full text-sm text-left">
+                  <thead>
+                    <tr className="bg-[#F3F5FF] text-[#223080]">
+                      <th className="px-4 py-2 font-bold">No</th>
+                      <th className="px-4 py-2 font-bold">Nama</th>
+                      <th className="px-4 py-2 font-bold">No. HP</th>
+                      <th className="px-4 py-2 font-bold">Alamat</th>
+                      <th className="px-4 py-2 font-bold">Action</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    {sortedWorkers.map((p: any, i: number) => (
+                      <tr key={p.id} className="border-b last:border-0 hover:bg-[#F3F5FF]">
+                        <td className="px-4 py-2">{i + 1}</td>
+                        <td className="px-4 py-2 font-semibold text-[#03045E]">{p.name}</td>
+                        <td className="px-4 py-2">{p.phone_number}</td>
+                        <td className="px-4 py-2">{p.address}</td>
+                        <td className="px-4 py-2 flex gap-2">
+                          <button className="px-3 py-1 rounded bg-[#324AB2] text-white text-xs font-semibold hover:bg-[#223080] transition">Edit</button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
             </div>
           </section>
         )}

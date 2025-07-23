@@ -1,5 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import CheckedIcon from '../assets/checked.png'
+import ReportIcon from '../assets/report.png'
 
 const DUMMY_TUGAS = [
   {
@@ -48,13 +50,13 @@ export default function TugasHarianPage() {
             className={`flex-1 py-2 text-center font-semibold text-base transition ${tab === 'tugas' ? 'bg-blue-50 text-blue-700' : 'text-gray-400 hover:bg-blue-100'}`}
             onClick={() => setTab('tugas')}
           >
-            <span className="inline-flex items-center gap-2"><span className="material-icons text-lg align-middle">check_circle</span> Tugas</span>
+            <span className="inline-flex items-center gap-2"><img src={CheckedIcon} alt="Tugas" className="w-5 h-5 align-middle" /> Tugas</span>
           </button>
           <button
             className={`flex-1 py-2 text-center font-semibold text-base transition ${tab === 'laporan' ? 'bg-blue-50 text-blue-700' : 'text-gray-400 hover:bg-blue-100'}`}
             onClick={() => setTab('laporan')}
           >
-            <span className="inline-flex items-center gap-2"><span className="material-icons text-lg align-middle">description</span> Laporan</span>
+            <span className="inline-flex items-center gap-2"><img src={ReportIcon} alt="Laporan" className="w-5 h-5 align-middle" /> Laporan</span>
           </button>
         </div>
 

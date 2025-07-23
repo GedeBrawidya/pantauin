@@ -24,7 +24,7 @@ export default function DashboardPekerja({ onPresensi, user }: {
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-[#e6eaff] p-4">
-      <div className="w-full max-w-md bg-white rounded-2xl shadow-2xl p-8 flex flex-col gap-8 items-center">
+      <div className="w-full max-w-md bg-white rounded-2xl shadow-2xl p-8 flex flex-col gap-8 items-center overflow-hidden max-w-full">
         <div className="flex flex-col items-center gap-2 w-full">
           <img
             src={foto || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(dummyUser.nama)}
@@ -37,14 +37,14 @@ export default function DashboardPekerja({ onPresensi, user }: {
           </div>
         </div>
         {/* Card Jumlah Hadir & Tidak Hadir - Refined Design, No Animation */}
-        <div className="flex flex-row gap-6 w-full justify-center items-center flex-wrap mt-2 mb-2">
-          <div className="flex-1 min-w-[160px] max-w-[220px] bg-gradient-to-br from-green-100 to-green-50 border-2 border-green-300 rounded-2xl p-6 flex flex-col items-center shadow-lg hover:shadow-xl transition-shadow duration-200 relative overflow-hidden">
+        <div className="flex flex-row gap-4 w-full justify-center items-center flex-wrap mt-2 mb-2 max-w-full">
+          <div className="flex-1 min-w-[140px] max-w-[220px] bg-gradient-to-br from-green-100 to-green-50 border-2 border-green-300 rounded-2xl p-4 flex flex-col items-center shadow-lg hover:shadow-xl transition-shadow duration-200 relative overflow-hidden max-w-full">
             <span className="material-icons text-green-600 text-4xl mb-2"></span>
             <div className="text-3xl font-extrabold text-green-700 drop-shadow-lg mb-1">{jumlahHadir}</div>
             <div className="text-green-800 font-bold text-base mb-1">Hari Hadir Kerja</div>
             <span className="absolute top-3 right-3 bg-green-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow">Hadir</span>
           </div>
-          <div className="flex-1 min-w-[160px] max-w-[220px] bg-gradient-to-br from-red-100 to-red-50 border-2 border-red-300 rounded-2xl p-6 flex flex-col items-center shadow-lg hover:shadow-xl transition-shadow duration-200 relative overflow-hidden">
+          <div className="flex-1 min-w-[140px] max-w-[220px] bg-gradient-to-br from-red-100 to-red-50 border-2 border-red-300 rounded-2xl p-4 flex flex-col items-center shadow-lg hover:shadow-xl transition-shadow duration-200 relative overflow-hidden max-w-full">
             <span className="material-icons text-red-500 text-4xl mb-2"></span>
             <div className="text-3xl font-extrabold text-red-600 drop-shadow-lg mb-1">{jumlahTidakHadir}</div>
             <div className="text-red-800 font-bold text-base mb-1">Hari Tidak Hadir</div>
