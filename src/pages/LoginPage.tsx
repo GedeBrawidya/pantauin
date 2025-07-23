@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import LogopantauinFix from '../assets/logopantauin-fix.png'
+import LogoPantauinNobg from '../assets/logo-nobg.png'
 
 export default function LoginPage({ onLogin }: { onLogin: (username: string, password: string) => void }) {
   const [username, setUsername] = useState('')
@@ -21,7 +21,7 @@ export default function LoginPage({ onLogin }: { onLogin: (username: string, pas
     <div className="min-h-screen flex flex-col justify-center items-center bg-gradient-to-br from-[#e6eaff] to-[#f3f5ff] p-4">
       <div className="w-full max-w-xs bg-white rounded-2xl shadow-2xl p-8 flex flex-col gap-8 items-center">
         <div className="flex flex-col items-center gap-2">
-          <img src={LogopantauinFix} alt="Logo Pantauin" className="w-20 h-20 mb-2 object-contain" />
+          <img src={LogoPantauinNobg} alt="Logo Pantauin" className="w-32 h-32 mb-2 object-contain" />
           <h1 className="text-3xl font-extrabold text-[#324AB2] tracking-tight">Pantauin</h1>
           <p className="text-gray-500 text-center text-base mt-1">Monitoring & Presensi Pekerja</p>
         </div>

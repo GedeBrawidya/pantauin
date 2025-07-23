@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { QRCodeSVG } from 'qrcode.react'
-import LogopantauinFix from '../assets/logopantauin-fix.png'
+import LogoPantauinNobg from '../assets/logo-nobg.png'
 import QrScan from '../assets/qr-scan.png'
 import HomeIcon from '../assets/home.png'
 import MemberIcon from '../assets/member.png'
@@ -162,7 +162,7 @@ export default function DashboardSupervisi() {
           <div>
             {/* Logo dan hamburger dalam satu baris, button minimize selalu tampil */}
             <div className={`flex items-center gap-2 mb-8 select-none transition-all duration-300`} style={{ minHeight: '48px' }}>
-              <img src={LogopantauinFix} alt="Logo Pantauin" className="w-8 h-8 object-contain" />
+              <img src={LogoPantauinNobg} alt="Logo Pantauin" className="w-10 h-10 object-contain" />
               <span className="text-2xl font-bold tracking-wide whitespace-nowrap text-[#223080]">Pantauin</span>
             </div>
             {/* Sidebar */}
