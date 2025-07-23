@@ -71,7 +71,7 @@ export default function DashboardSupervisi() {
 
   useEffect(() => {
     setLoadingTasks(true);
-    fetch(import.meta.env.VITE_BASEURL + '/api/tasks')
+    fetch('/api/tasks')
       .then(res => res.json())
       .then(data => {
         setTasks(data.data || []);
@@ -85,7 +85,7 @@ export default function DashboardSupervisi() {
 
   useEffect(() => {
     setLoadingWorker(true);
-    fetch(import.meta.env.VITE_BASEURL + '/api/workers/')
+    fetch('/api/workers/')
       .then(res => res.json())
       .then(data => {
         // Data: { data: { data: [{ total_worker: 2 }] } }
@@ -100,7 +100,7 @@ export default function DashboardSupervisi() {
   useEffect(() => {
     if (sidebar === 'pekerja') {
       setLoadingWorkers(true);
-      fetch(import.meta.env.VITE_BASEURL + '/api/workers/all')
+      fetch('/api/workers/all')
         .then(res => res.json())
         .then(data => {
           setWorkers(data.data?.data || []);
@@ -116,7 +116,7 @@ export default function DashboardSupervisi() {
   useEffect(() => {
     if (sidebar === 'dashboard') {
       setLoadingActivities(true);
-      fetch(import.meta.env.VITE_BASEURL + '/api/workers/tasks')
+      fetch('/api/workers/tasks')
         .then(res => res.json())
         .then(data => {
           setRecentActivities(data.data || []);

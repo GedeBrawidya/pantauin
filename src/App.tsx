@@ -20,11 +20,11 @@ function AppRoutes() {
 
   function handleLogin(username: string, password: string) {
     // Email dummy untuk login
-    if ((username === 'supervisi@pantauin.com' || username === 'supervisi') && password === 'supervisi123') {
+    if ((username === 's' || username === 's') && password === '123') {
       setRole('supervisi')
       setUser({ nama: 'Supervisi', jabatan: 'Supervisor', avatarUrl: '' })
       navigate('/supervisi')
-    } else if ((username === 'pekerja@pantauin.com' || username === 'pekerja') && password === 'pekerja123') {
+    } else if ((username === 'pekerja' || username === 'pekerja') && password === '123') {
       setRole('pekerja')
       setUser({ nama: 'Pekerja', jabatan: 'Operator Lapangan', avatarUrl: '' })
       navigate('/dashboard')
